@@ -1,4 +1,3 @@
-
 # vibration measurements for linear, non accelerated movements 
 #
 # Copyright (C) 2022  Marc Marschall <MarschallMarc#6420>
@@ -57,6 +56,7 @@ class LinearMovementVibrationsTest:
         peak_frequencies = []
         for velocity in range(v_min, v_max, v_step):
             measurement_data = self._measure_linear_movement_vibrations(velocity,axis, motion_report)
+            # measurement step time
             dt = (measurement_data[len(measurement_data)-1][0]-measurement_data[0][0])/(len(measurement_data)-1)
             frequency_response = np.array(self._calculate_frequencies(measurement_data, dt))
             mapped_frequency_response = map(add, map(add, frequency_response[0][1],frequency_response[1][1]),frequency_response[2][1])
@@ -100,7 +100,9 @@ class LinearMovementVibrationsTest:
         plt.title("Vibration peak frequenices for axis {}".format(axis))
         plt.xlabel("velocity in mm/s")
         plt.ylabel("peak frequency in Hz")
-        plt.plot(data[:,0],data[:,1])
+        plt.plot(data[:,0],data[:,1], label="measurement data")
+        plt.plot(data[:,0], data[:,0]/2, label="belt_teeth_frequency")
+        plt.legend()
         plt.savefig(outfile)
         self.gcode.respond_info("output written to {}".format(outfile))
         plt.close('all')
