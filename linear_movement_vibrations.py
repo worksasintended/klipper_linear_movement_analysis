@@ -36,7 +36,6 @@ class LinearMovementVibrationsTest:
                                     self.cmd_MEASURE_LINEAR_VIBRATIONS_RANGE,
                                     description)
 
-
         # get accel chips, source: resonance_tester.py, should be refactored into helper function on merge
         if not config.get('accel_chip_x', None):
             self.accel_chip_names = [('xy', config.get('accel_chip').strip())]
@@ -46,7 +45,6 @@ class LinearMovementVibrationsTest:
                 ('y', config.get('accel_chip_y').strip())]
             if self.accel_chip_names[0][1] == self.accel_chip_names[1][1]:
                 self.accel_chip_names = [('xy', self.accel_chip_names[0][1])]
-
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self,gcmd):
         axis = self._get_axis(gcmd)
@@ -58,7 +56,7 @@ class LinearMovementVibrationsTest:
             measurement_data = self._measure_linear_movement_vibrations(velocity,axis, motion_report)
             # measurement step time
             dt = (measurement_data[len(measurement_data)-1][0]-measurement_data[0][0])/(len(measurement_data)-1)
-            frequency_response = np.array(self._calculate_frequencies(measurement_data, dt))
+            frequency_response = np.array(self._calculate_frequencies(measurement_data, dt,1000))
             mapped_frequency_response = map(add, map(add, frequency_response[0][1],frequency_response[1][1]),frequency_response[2][1])
             summed_max_index = np.argmax(mapped_frequency_response)
             peak_frequency = frequency_response[0][0][summed_max_index]
@@ -115,9 +113,6 @@ class LinearMovementVibrationsTest:
             pd+=abs(y)/norm
             pd+=abs(z)/norm
         return pd
-        
-
-
 
     def cmd_PRINT_LAST_MOVE_TIME(self,gcmd):
         self.gcode.respond_info(str(self.toolhead.get_last_move_time()))
@@ -129,14 +124,13 @@ class LinearMovementVibrationsTest:
         measurement_data = self._measure_linear_movement_vibrations(velocity,axis, motion_report)
         dt = (measurement_data[len(measurement_data)-1][0]-measurement_data[0][0])/(len(measurement_data)-1)
         #TODO manage axis assignments
-        frequency_response = self._calculate_frequencies(measurement_data, dt)
+        frequency_response = self._calculate_frequencies(measurement_data, dt,200)
         out_directory = "/home/pi/klipper_config/linear_vibrations/"
         if not os.path.exists(out_directory):
             os.makedirs(out_directory)
         outfile = out_directory + "linear_movement_responce_" + str(velocity) +  "mmps_" + datetime.today().isoformat() + ".png"
         self._plot_frequencies(frequency_response, outfile, velocity, axis)
             
-
     def _get_velocity(self, gcmd):
         velocity = int(gcmd.get("VELOCITY", None))
         velocity = (velocity,150)[velocity is None]
@@ -166,7 +160,7 @@ class LinearMovementVibrationsTest:
         self.gcode.respond_info("output written to {}".format(outfile))
         plt.close('all')
 
-    def _calculate_frequencies(self, data, dt):
+    def _calculate_frequencies(self, data, dt, f_max):
         frequency_response = []
         start_pos = 0
         end_pos = 0
@@ -175,7 +169,7 @@ class LinearMovementVibrationsTest:
             absc_fourier =  np.fft.rfftfreq(data[:,axis].size, dt)
             if start_pos == 0:
                     start_pos = np.argmax(absc_fourier > 10)
-                    end_pos = np.argmax(absc_fourier > 200)
+                    end_pos = np.argmax(absc_fourier > f_max)
             frequency_response.append([absc_fourier[start_pos:end_pos],ord_fourier[start_pos:end_pos]])
         return frequency_response
 
