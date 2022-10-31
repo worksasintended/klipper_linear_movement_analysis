@@ -1,1 +1,40 @@
-# klipper_linear_movement_analysis
+# Klipper Linear Movement Vibrations Analysis
+This is a klipper extension allowing to measure vibrations on linear movements on different axis. Unlike with previous solutions, the acceleration phases in the moves are not part of the analysed data. 
+
+## Usage
+This extension adds two new GCODE commands:
+
+`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]` will measure the vibrations frequency spectrum and create a file in the directory defined in the config as follows:
+
+![linear_movement_responce_150mmps_2022-10-30T17_53_59 439905](https://user-images.githubusercontent.com/20718963/199113335-7f21d635-22e4-4c77-abc3-ec5677382064.png)
+
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>]` goes through a range of velocities and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
+
+![peak_frequencies2022-10-31T21_32_59 251182](https://user-images.githubusercontent.com/20718963/199114761-f4592815-93a7-43ba-8a97-2cb7aaf6614a.png)
+![relative_power2022-10-31T21_32_58 727183](https://user-images.githubusercontent.com/20718963/199114782-a5c26bd9-f85c-4b45-90e0-74596a00c371.png)
+
+
+## Installation
+This extension requires matplotlib. To install it login into your rpi using ssh and excecute the following command:
+```~/klippy-env/bin/pip install -v matplotlib```
+This will take a couple of minutes to run through and create some load on the rpi. Don't do this while printing. 
+
+Move the file `linear_movement_vibrations.py` (you can find it here in this repo) into the `klippy/extensions` to install the extension. 
+
+Add the section `[linear_movement_vibrations]` to your `printer.cfg`
+Example configuration:
+```
+[linear_movement_vibrations]
+accel_chip: adxl345
+x_min: 5
+x_max: 175
+y_min: 5
+y_max: 175
+output_directory: /home/pi/klipper_config/linear_vibrations/
+```
+Make sure the defined output directory is readable. The one in the example shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the browser frontend if you are using RatOS. If you are not using RatOS and are unsure which directroy to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed. 
+If you are using multiple accelerometers, you can also define them as such
+```
+accel_chip_x: adxl345 rpi
+accel_chip_y: adxl345
+```
