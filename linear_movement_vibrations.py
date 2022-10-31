@@ -152,7 +152,7 @@ class LinearMovementVibrationsTest:
         for i in range(len(data)):
             if motion_report.trapqs['toolhead'].get_trapq_position(data[i, 0])[1] == velocity:
                 data = data[i:]
-                velocity_reached = False
+                velocity_not_reached = False
                 break
         for i in range(len(data)):
             if motion_report.trapqs['toolhead'].get_trapq_position(data[i, 0])[1] < velocity:
@@ -228,23 +228,23 @@ class LinearMovementVibrationsTest:
             p1_y = limits[3] / 2
             p2_x = limits[1]
             p2_y = p1_y
-        if axis.lower() == "y":
+        elif axis.lower() == "y":
             p1_x = limits[2] / 2
             p1_y = limits[1]
             p2_x = p1_x
             p2_y = limits[3]
-        if axis.lower() == "a":
+        elif axis.lower() == "a":
             p1_x = limits[0]
             p1_y = limits[2]
             p2_x = limits[1]
             p2_y = limits[3]
-            p2_x, p2_y = (p1_x, p1_y, p2_x, p2_y)
-        if axis.lower() == "b":
+            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
+        elif axis.lower() == "b":
             p1_x = limits[1]
             p1_y = limits[2]
             p2_x = limits[0]
             p2_y = limits[3]
-            p2_x, p2_y = (p1_x, p1_y, p2_x, p2_y)
+            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
         return [p1_x, p1_y], [p2_x, p2_y]
 
     @staticmethod
