@@ -46,6 +46,18 @@ def calculate_frequencies(data, f_max):
     return frequency_response
 
 
+# checks if movement is diagonal and corrects its destination to be a diagonal movement if not
+# by using the point towards the center which is the closest to the original fulfilling diagonality
+# @param p1_x x-coordinate of starting point
+# @param p2_x x-coordinate of the target point
+def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
+    if abs(p1_x - p2_x) > abs(p1_y - p2_y):
+        p2_x = p1_x + p2_y - p1_y
+    elif abs(p1_x - p2_x) < abs(p1_y - p2_y):
+        p2_y = p1_y + p2_x - p1_x
+    return p2_x, p2_y
+
+
 class LinearMovementVibrationsTest:
     def __init__(self, config):
         self.printer = config.get_printer()
@@ -264,17 +276,6 @@ class LinearMovementVibrationsTest:
         self.accel_chips = [
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names]
-
-# checks if movement is diagonal and corrects its destination to be a diagonal movement if not
-# by using the point towards the center which is the closest to the original fulfilling diagonality
-# @param p1_x x-coordinate of starting point
-# @param p2_x x-coordinate of the target point
-def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
-    if abs(p1_x - p2_x) > abs(p1_y - p2_y):
-        p2_x = p1_x + p2_y - p1_y
-    elif abs(p1_x - p2_x) < abs(p1_y - p2_y):
-        p2_y = p1_y + p2_x - p1_x
-    return p2_x, p2_y
 
 
 def load_config(config):
