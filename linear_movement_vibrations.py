@@ -92,6 +92,7 @@ class LinearMovementVibrationsTest:
         peak_frequencies = []
         start_pos, end_pos = self._get_move_positions(axis, self.limits)
         for velocity in range(v_min, v_max, v_step):
+            gcmd.respond_info("measuring {} mm/s".format(velocity))
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
             frequency_response = np.array(calculate_frequencies(measurement_data, 1000))
             summed_max_index = self._find_max_total_acceleration(frequency_response)
@@ -140,7 +141,8 @@ class LinearMovementVibrationsTest:
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
 
-        measurement_data_stripped = self._strip_to_linear_velocity_share(velocity, measurement_data, motion_report, self.gcode)
+        measurement_data_stripped = self._strip_to_linear_velocity_share(velocity, measurement_data, motion_report,
+                                                                         self.gcode)
         return measurement_data_stripped
 
     @staticmethod
@@ -157,8 +159,8 @@ class LinearMovementVibrationsTest:
                 data = data[0:(i - 1)]
                 break
         if not velocity_not_reached or len(data) < 600:
-            gcmd.error("Target velocity not reached for a sufficient amount of time. Either decrease target "
-                       "velocity, increase acceleration or increase test area ")
+            raise gcmd.error("Target velocity not reached for a sufficient amount of time. Either decrease target "
+                             "velocity, increase acceleration or increase test area ")
         return data
 
     @staticmethod
