@@ -216,14 +216,16 @@ class LinearMovementVibrationsTest:
             p2_y = limits[3]
         if axis.lower() == "a":
             p1_x = limits[0]
-            p1_y = limits[1]
-            p2_x = limits[2]
-            p2_y = limits[3]
-        if axis.lower() == "b":
-            p1_x = limits[3]
             p1_y = limits[2]
             p2_x = limits[1]
-            p2_y = limits[0]
+            p2_y = limits[3]
+            p2_x, p2_y = (p1_x, p1_y, p2_x, p2_y)
+        if axis.lower() == "b":
+            p1_x = limits[1]
+            p1_y = limits[2]
+            p2_x = limits[0]
+            p2_y = limits[3]
+            p2_x, p2_y = (p1_x, p1_y, p2_x, p2_y)
         return [p1_x, p1_y], [p2_x, p2_y]
 
     @staticmethod
@@ -262,6 +264,17 @@ class LinearMovementVibrationsTest:
         self.accel_chips = [
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names]
+
+# checks if movement is diagonal and corrects its destination to be a diagonal movement if not
+# by using the point towards the center which is the closest to the original fulfilling diagonality
+# @param p1_x x-coordinate of starting point
+# @param p2_x x-coordinate of the target point
+def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
+    if abs(p1_x - p2_x) > abs(p1_y - p2_y):
+        p2_x = p1_x + p2_y - p1_y
+    elif abs(p1_x - p2_x) < abs(p1_y - p2_y):
+        p2_y = p1_y + p2_x - p1_x
+    return p2_x, p2_y
 
 
 def load_config(config):
