@@ -5,6 +5,7 @@ This is a klipper extension allowing to measure vibrations on linear movements o
 This extension adds two new GCODE commands:
 
 `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]` will measure the vibrations frequency spectrum and create a file in the directory defined in the config as follows:
+
 ![linear_movement_responce_150mmps_2022-10-30T17_53_59 439905](https://user-images.githubusercontent.com/20718963/199113335-7f21d635-22e4-4c77-abc3-ec5677382064.png)
 
 `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>]` goes through a range of velocities and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
