@@ -158,7 +158,7 @@ class LinearMovementVibrationsTest:
             if motion_report.trapqs['toolhead'].get_trapq_position(data[i, 0])[1] < velocity:
                 data = data[0:(i - 1)]
                 break
-        if not velocity_not_reached or len(data) < 600:
+        if velocity_not_reached or len(data) < 600:
             raise gcmd.error("Target velocity not reached for a sufficient amount of time. Either decrease target "
                              "velocity, increase acceleration or increase test area ")
         return data
