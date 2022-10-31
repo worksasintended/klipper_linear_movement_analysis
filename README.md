@@ -23,7 +23,8 @@ Move the file `linear_movement_vibrations.py` (you can find it here in this repo
 
 Add the section `[linear_movement_vibrations]` to your `printer.cfg`
 Example configuration:
-```[linear_movement_vibrations]
+```
+[linear_movement_vibrations]
 accel_chip: adxl345
 x_min: 5
 x_max: 175
