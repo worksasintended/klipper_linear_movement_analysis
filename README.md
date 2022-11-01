@@ -21,7 +21,7 @@ This extension requires matplotlib. To install it login into your rpi using ssh 
 ```~/klippy-env/bin/pip install -v matplotlib```
 This will take a couple of minutes to run through and create some load on the rpi. Don't do this while printing. 
 
-Move the file `linear_movement_vibrations.py` (you can find it here in this repo) into the `klippy/extensions` to install the extension. 
+Move the file `linear_movement_vibrations.py` (you can find it here in this repo) into the `klippy/extras` directory to install the extension. 
 
 Add the section `[linear_movement_vibrations]` to your `printer.cfg`
 Example configuration:
@@ -34,9 +34,10 @@ y_min: 5
 y_max: 175
 output_directory: /home/pi/klipper_config/linear_vibrations/
 ```
-Make sure the defined output directory is writable. The one in the example shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the browser frontend if you are using RatOS. If you are not using RatOS and are unsure which directroy to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed. 
+Make sure the defined output directory is writable. The one in the example configuration shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the web frontend, assuming you are using RatOS. Similar to the `input_shaper folder`, you can find it in the machine tab in the `config` root.  If you are not using RatOS and are unsure which directroy to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed. 
 If you are using multiple accelerometers, you can also define them as such (untested feature)
 ```
 accel_chip_x: adxl345 rpi
 accel_chip_y: adxl345
 ```
+After these steps, restart klipper. 
