@@ -204,7 +204,7 @@ class LinearMovementVibrationsTest:
         plt.xlabel("velocity in mm/s")
         plt.ylabel("peak frequency in Hz")
         plt.plot(data[:, 0], data[:, 1], label="measurement data")
-        plt.plot(data[:, 0], data[:, 0] / 2, label="belt_teeth_frequency")
+        plt.plot(data[:, 0], data[:, 0] / 2, label="teeth frequency 2gt-belt")
         plt.legend()
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
