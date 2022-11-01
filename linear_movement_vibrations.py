@@ -91,7 +91,7 @@ class LinearMovementVibrationsTest:
         frequency_responses = []
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
-        for velocity in range(v_min, v_max, v_step):
+        for velocity in range(v_min, v_max+1, v_step):
             gcmd.respond_info("measuring {} mm/s".format(velocity))
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
