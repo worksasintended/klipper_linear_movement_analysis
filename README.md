@@ -11,7 +11,7 @@ This extension adds two new GCODE commands:
 `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>]` goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
 
 ![frequency_responses_v-range2022-11-01T13_55_39 067495](https://user-images.githubusercontent.com/20718963/199251639-0972baed-a081-4a83-aa8b-13150158ad59.png)
-![peak_frequencies2022-10-31T21_32_59 251182](https://user-images.githubusercontent.com/20718963/199114761-f4592815-93a7-43ba-8a97-2cb7aaf6614a.png)
+![peak_frequencies2022-11-01T14_01_02 980854](https://user-images.githubusercontent.com/20718963/199255538-db5a9a7b-c424-44b3-b473-598dd4df22c5.png)
 ![relative_power2022-10-31T21_32_58 727183](https://user-images.githubusercontent.com/20718963/199114782-a5c26bd9-f85c-4b45-90e0-74596a00c371.png)
 
 
