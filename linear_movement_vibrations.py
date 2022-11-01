@@ -15,6 +15,7 @@ matplotlib.use("Agg")
 import numpy as np
 import os
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 
 # calculates the mean square of 3d acceleration data summing up all three components
@@ -88,16 +89,21 @@ class LinearMovementVibrationsTest:
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         powers = []
         peak_frequencies = []
+        frequency_responses = []
         start_pos, end_pos = self._get_move_positions(axis, self.limits)
         for velocity in range(v_min, v_max, v_step):
             gcmd.respond_info("measuring {} mm/s".format(velocity))
+            # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-            frequency_response = np.array(calculate_frequencies(measurement_data, 1000))
-            summed_max_index = self._find_max_total_acceleration(frequency_response)
+            frequency_response = np.array(calculate_frequencies(measurement_data, 400))
+            mapped_frequency_response = self._map_r3_response_to_single_axis(frequency_response)
+            frequency_responses.append([velocity, frequency_response[0], mapped_frequency_response])
+            summed_max_index = np.argmax(mapped_frequency_response)
             peak_frequency = frequency_response[0][summed_max_index]
             peak_frequencies.append([velocity, peak_frequency])
             power = calculate_total_power(measurement_data)
             powers.append([velocity, power])
+            # reverse movement
             start_pos_last = start_pos
             start_pos = end_pos
             end_pos = start_pos_last
@@ -107,6 +113,8 @@ class LinearMovementVibrationsTest:
         self._plot_relative_power(powers, outfile, axis, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
         self._plot_peak_frequencies(peak_frequencies, outfile, axis, gcmd)
+        outfile = self._get_outfile_name(self.out_directory, "frequency_responses_v-range")
+        self._plot_frequency_responses_over_velocity(frequency_responses, outfile, axis, gcmd)
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         axis = self._get_axis(gcmd)
@@ -162,11 +170,10 @@ class LinearMovementVibrationsTest:
         return data
 
     @staticmethod
-    def _find_max_total_acceleration(frequency_response):
-        mapped_frequency_response = map(add, map(add, frequency_response[1], frequency_response[2]),
-                                        frequency_response[3])
-        summed_max_index = np.argmax(mapped_frequency_response)
-        return summed_max_index
+    def _map_r3_response_to_single_axis(frequency_response):
+        combined_array = np.array([frequency_response[1], frequency_response[2], frequency_response[3]])
+        mapped_frequency_response = combined_array.sum(axis=0)
+        return mapped_frequency_response
 
     @staticmethod
     def _plot_frequencies(data, outfile, velocity, axis, gcmd):
@@ -200,12 +207,32 @@ class LinearMovementVibrationsTest:
     def _plot_peak_frequencies(data, outfile, axis, gcmd):
         data = np.array(data)
         plt.ioff()
-        plt.title("Vibration peak frequenices for axis {}".format(axis))
+        plt.title("Vibration peak frequencies for axis {}".format(axis))
         plt.xlabel("velocity in mm/s")
         plt.ylabel("peak frequency in Hz")
         plt.plot(data[:, 0], data[:, 1], label="measurement data")
         plt.plot(data[:, 0], data[:, 0] / 2, label="teeth frequency 2gt-belt")
         plt.legend()
+        plt.savefig(outfile)
+        gcmd.respond_info("output written to {}".format(outfile))
+        plt.close('all')
+
+    @staticmethod
+    def _plot_frequency_responses_over_velocity(data, outfile, axis, gcmd):
+        data = np.array(data)
+        plt.ioff()
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        fig.suptitle("Vibration peak frequencies for axis {}".format(axis))
+        plt.ticklabel_format(style='sci', axis='z', scilimits=(0, 0))
+        for velocity_sample in data:
+            x = velocity_sample[1]
+            y = velocity_sample[2]
+            z = velocity_sample[0]
+            ax.plot(x, y, zs=z, zdir='y')
+        ax.set_xlabel("f in Hz")
+        ax.set_zlabel("relative response")
+        ax.set_ylabel("velocity")
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         plt.close('all')
