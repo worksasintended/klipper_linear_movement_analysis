@@ -7,7 +7,6 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
 import datetime
-from operator import add
 
 import matplotlib
 
@@ -81,7 +80,7 @@ class LinearMovementVibrationsTest:
                 self.accel_chip_names = [('xy', self.accel_chip_names[0][1])]
 
         self.out_directory = config.get('output_directory')
-        self.limits = self._get_limits(config)
+        self.limits = self._get_limits_from_config(config)
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
         axis = self._get_axis(gcmd)
@@ -90,7 +89,8 @@ class LinearMovementVibrationsTest:
         powers = []
         peak_frequencies = []
         frequency_responses = []
-        start_pos, end_pos = self._get_move_positions(axis, self.limits)
+        limits = self._get_limits_from_gcode(gcmd, self.limits)
+        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         for velocity in range(v_min, v_max, v_step):
             gcmd.respond_info("measuring {} mm/s".format(velocity))
             # collect data and add them to the sets
@@ -120,7 +120,8 @@ class LinearMovementVibrationsTest:
         axis = self._get_axis(gcmd)
         velocity = self._get_velocity(gcmd)
         motion_report = self.printer.lookup_object('motion_report')
-        start_pos, end_pos = self._get_move_positions(axis, self.limits)
+        limits = self._get_limits_from_gcode(gcmd, self.limits)
+        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
         frequency_response = calculate_frequencies(measurement_data, 200)
         if not os.path.exists(self.out_directory):
@@ -238,7 +239,7 @@ class LinearMovementVibrationsTest:
         plt.close('all')
 
     @staticmethod
-    def _get_limits(config):
+    def _get_limits_from_config(config):
         x_min = int(config.get('x_min'))
         x_max = int(config.get('x_max'))
         y_min = int(config.get('y_min'))
@@ -246,7 +247,15 @@ class LinearMovementVibrationsTest:
         return x_min, x_max, y_min, y_max
 
     @staticmethod
-    def _get_move_positions(axis, limits):
+    def _get_limits_from_gcode(gcmd, limits):
+        x_min = gcmd.get_int("XMIN", limits[0])
+        x_max = gcmd.get_int("XMAX", limits[1])
+        y_min = gcmd.get_int("YMIN", limits[2])
+        y_max = gcmd.get_int("YMAX", limits[3])
+        return x_min, x_max, y_min, y_max
+
+    @staticmethod
+    def _get_move_positions(axis, limits, gcmd):
         p1_x = p1_y = p2_x = p2_y = 0
         if axis.lower() == "x":
             p1_x = limits[0]
@@ -270,6 +279,11 @@ class LinearMovementVibrationsTest:
             p2_x = limits[0]
             p2_y = limits[3]
             p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
+
+        p1_x = gcmd.get_int("STARTX", p1_x)
+        p1_y = gcmd.get_int("STARTY", p1_y)
+        p2_x = gcmd.get_int("ENDX", p2_x)
+        p2_y = gcmd.get_int("ENDY", p2_y)
         return [p1_x, p1_y], [p2_x, p2_y]
 
     @staticmethod
