@@ -254,8 +254,8 @@ class LinearMovementVibrationsTest:
             p2_x = limits[1]
             p2_y = p1_y
         elif axis.lower() == "y":
-            p1_x = limits[2] / 2
-            p1_y = limits[1]
+            p1_x = limits[1] / 2
+            p1_y = limits[2]
             p2_x = p1_x
             p2_y = limits[3]
         elif axis.lower() == "a":
