@@ -32,17 +32,15 @@ def calculate_total_power(data):
 # @param data: array[[t0, x0, y0, z0],...,[tn, xn, yn, zn]]
 # @param f_max::float : maximum frequency considered
 def calculate_frequencies(data, f_max):
-    frequency_response = []
-    start_pos = 0
-    end_pos = 0
     dt = (data[len(data) - 1][0] - data[0][0]) / (len(data) - 1)
+    norm = data[:, 0].size
+    absc_fourier = np.fft.rfftfreq(norm, dt)
+    start_pos = np.argmax(absc_fourier > 10)
+    end_pos = np.argmax(absc_fourier > f_max)
+    frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
         ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
-        absc_fourier = np.fft.rfftfreq(data[:, axis].size, dt)
-        if start_pos == 0:
-            start_pos = np.argmax(absc_fourier > 10)
-            end_pos = np.argmax(absc_fourier > f_max)
-        frequency_response.append([absc_fourier[start_pos:end_pos], ord_fourier[start_pos:end_pos]])
+        frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
 
@@ -96,7 +94,7 @@ class LinearMovementVibrationsTest:
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
             frequency_response = np.array(calculate_frequencies(measurement_data, 1000))
             summed_max_index = self._find_max_total_acceleration(frequency_response)
-            peak_frequency = frequency_response[0][0][summed_max_index]
+            peak_frequency = frequency_response[0][summed_max_index]
             peak_frequencies.append([velocity, peak_frequency])
             power = calculate_total_power(measurement_data)
             powers.append([velocity, power])
@@ -165,8 +163,8 @@ class LinearMovementVibrationsTest:
 
     @staticmethod
     def _find_max_total_acceleration(frequency_response):
-        mapped_frequency_response = map(add, map(add, frequency_response[0][1], frequency_response[1][1]),
-                                        frequency_response[2][1])
+        mapped_frequency_response = map(add, map(add, frequency_response[1], frequency_response[2]),
+                                        frequency_response[3])
         summed_max_index = np.argmax(mapped_frequency_response)
         return summed_max_index
 
@@ -177,9 +175,9 @@ class LinearMovementVibrationsTest:
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.xlabel("frequency in Hz")
         plt.ylabel("response")
-        plt.plot(data[0][0], data[0][1], label="x")
-        plt.plot(data[1][0], data[1][1], label="y")
-        plt.plot(data[2][0], data[2][1], label="z")
+        plt.plot(data[0], data[1], label="x")
+        plt.plot(data[0], data[2], label="y")
+        plt.plot(data[0], data[3], label="z")
         plt.legend()
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
