@@ -95,7 +95,7 @@ class LinearMovementVibrationsTest:
             gcmd.respond_info("measuring {} mm/s".format(velocity))
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-            frequency_response = np.array(calculate_frequencies(measurement_data, 400))
+            frequency_response = np.array(calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 400)))
             mapped_frequency_response = self._map_r3_response_to_single_axis(frequency_response)
             frequency_responses.append([velocity, frequency_response[0], mapped_frequency_response])
             summed_max_index = np.argmax(mapped_frequency_response)
@@ -123,7 +123,7 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-        frequency_response = calculate_frequencies(measurement_data, 200)
+        frequency_response = calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 200))
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, ("linear_movement_responce_" + str(velocity) + "mmps_"))
