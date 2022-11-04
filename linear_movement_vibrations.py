@@ -31,12 +31,12 @@ def calculate_total_power(data):
 # calculates the frequency spectrum via fft in a given dataset
 # @param data: array[[t0, x0, y0, z0],...,[tn, xn, yn, zn]]
 # @param f_max::float : maximum frequency considered
-def calculate_frequencies(data, f_max):
+def calculate_frequencies(data, f_max, f_min):
     dt = (data[len(data) - 1][0] - data[0][0]) / (len(data) - 1)
     norm = data[:, 0].size
     absc_fourier = np.fft.rfftfreq(norm, dt)
-    start_pos = np.argmax(absc_fourier > 10)
-    end_pos = np.argmax(absc_fourier > f_max)
+    start_pos = np.argmax(absc_fourier >= f_min)
+    end_pos = np.argmax(absc_fourier >= f_max)
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
         ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
@@ -95,7 +95,7 @@ class LinearMovementVibrationsTest:
             gcmd.respond_info("measuring {} mm/s".format(velocity))
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-            frequency_response = np.array(calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120)))
+            frequency_response = np.array(calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120)), gcmd.get_int("FMIN", 10))
             mapped_frequency_response = self._map_r3_response_to_single_axis(frequency_response)
             frequency_responses.append([velocity, frequency_response[0], mapped_frequency_response])
             summed_max_index = np.argmax(mapped_frequency_response)
@@ -123,7 +123,7 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-        frequency_response = calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120))
+        frequency_response = calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120), gcmd.get_int("FMIN", 10))
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, ("linear_movement_responce_" + str(velocity) + "mmps_"))
