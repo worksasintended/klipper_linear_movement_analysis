@@ -199,7 +199,7 @@ class LinearMovementVibrationsTest:
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.xlabel("velocity in mm/s")
         plt.ylabel("relative power")
-        plt.plot(data[:, 0], data[:, 1])
+        plt.plot(data[:, 0], data[:, 1], marker='o',label="measurement data")
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         plt.close('all')
