@@ -14,13 +14,13 @@ The settings `STARTX, STARTY, ENDX, ENDY`allow to define a movement between any 
 
 **In most usecases it is sufficient to only use `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]`**
 
-`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [DROT=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
 
 ![frequency_responses_v-range2022-11-01T13_55_39 067495](https://user-images.githubusercontent.com/20718963/199251639-0972baed-a081-4a83-aa8b-13150158ad59.png)
 ![peak_frequencies2022-11-01T14_01_02 980854](https://user-images.githubusercontent.com/20718963/199255538-db5a9a7b-c424-44b3-b473-598dd4df22c5.png)
 ![relative_power2022-10-31T21_32_58 727183](https://user-images.githubusercontent.com/20718963/199114782-a5c26bd9-f85c-4b45-90e0-74596a00c371.png)
 
-Please read above about the different settings possible. 
+Please read above about the different settings possible. `DROT` defines the diameter of an idler or pulley. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys.   
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] `**
 
@@ -45,7 +45,7 @@ output_directory: /home/pi/klipper_config/linear_vibrations/
 ```
 Make sure the defined output directory is writable. The one in the example configuration shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the web frontend, assuming you are using RatOS. Similar to the `input_shaper folder`, you can find it in the machine tab in the `config` root.  If you are not using RatOS and are unsure which directroy to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed.
 `x_min, x_max,y_min, y_max`define a triangle in which the measuremnts will be performend. 
-
+z
 If you are using multiple accelerometers, you can also define them as such (untested feature)
 ```
 accel_chip_x: adxl345 rpi
