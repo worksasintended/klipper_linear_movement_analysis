@@ -12,6 +12,11 @@ The settings `XMIN, XMAX, YMINN, YMAX` overwrite the measurement rectangle defin
 
 The settings `STARTX, STARTY, ENDX, ENDY`allow to define a movement between any two points. Be aware that this causes the movement to possibly happen on a path different to the defined axis. In this case the axis is only used to find the adxl corresponding to the axis in case of multiple accelerometers. Also make sure that the defined points have a distance big enough to reach target velocity. 
 
+`DROT` defines the diameter of an idler or pulley. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys. 
+Please be aware, that those frequencies are usually pretty low. To get useful results measure at the fastest speed possible and set `FMIN` to a low value as well as you need to choose the longest travel distance possible.
+
+`FMIN, FMAX` define the frequency range considered. All data outside this range are ignored. Be aware, due to the nature of an fft it does not make sense to use extremely low frequencies that correspond to less than half the measuring time. 
+
 **In most usecases it is sufficient to only use `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]`**
 
 `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [DROT=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
@@ -20,7 +25,7 @@ The settings `STARTX, STARTY, ENDX, ENDY`allow to define a movement between any 
 ![peak_frequencies2022-11-01T14_01_02 980854](https://user-images.githubusercontent.com/20718963/199255538-db5a9a7b-c424-44b3-b473-598dd4df22c5.png)
 ![relative_power2022-10-31T21_32_58 727183](https://user-images.githubusercontent.com/20718963/199114782-a5c26bd9-f85c-4b45-90e0-74596a00c371.png)
 
-Please read above about the different settings possible. `DROT` defines the diameter of an idler or pulley. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys.   
+Please read above about the different settings possible.   
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] `**
 
