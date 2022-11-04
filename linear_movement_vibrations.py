@@ -113,7 +113,8 @@ class LinearMovementVibrationsTest:
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         self._plot_relative_power(powers, outfile, axis, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
-        self._plot_peak_frequencies(peak_frequencies, outfile, axis, gcmd, d=gcmd.get_float("DROT", None), step_distance=gcmd.get_float("STEPDIST", None))
+        self._plot_peak_frequencies(peak_frequencies, outfile, axis, gcmd, d=gcmd.get_float("DROT", None),
+                                    step_distance=gcmd.get_float("STEPDIST", None))
         outfile = self._get_outfile_name(self.out_directory, "frequency_responses_v-range")
         self._plot_frequency_responses_over_velocity(frequency_responses, outfile, axis, gcmd)
 
@@ -153,6 +154,10 @@ class LinearMovementVibrationsTest:
         measurement_data_stripped = self._strip_to_linear_velocity_share(velocity, measurement_data, motion_report,
                                                                          self.gcode)
         return measurement_data_stripped
+
+    @staticmethod
+    def _get_step_distance(printer):
+        return 1, 1
 
     @staticmethod
     def _strip_to_linear_velocity_share(velocity, data, motion_report, gcmd):
@@ -217,7 +222,7 @@ class LinearMovementVibrationsTest:
         plt.plot(data[:, 0], data[:, 0] / 2, label="teeth frequency 2gt-belt")
         if d is not None:
             plt.plot(data[:, 0], data[:, 0] / (np.pi * d), label="full rotation idler/pulley")
-        if step is not None:
+        if step_distance is not None:
             plt.plot(data[:, 0], data[:, 0] / step_distance, label="full rotation idler/pulley")
         plt.legend()
         plt.savefig(outfile)
