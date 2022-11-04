@@ -91,11 +91,12 @@ class LinearMovementVibrationsTest:
         frequency_responses = []
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
-        for velocity in range(v_min, v_max+1, v_step):
+        for velocity in range(v_min, v_max + 1, v_step):
             gcmd.respond_info("measuring {} mm/s".format(velocity))
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-            frequency_response = np.array(calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120), gcmd.get_int("FMIN", 10)))
+            frequency_response = np.array(
+                calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120), gcmd.get_int("FMIN", 10)))
             mapped_frequency_response = self._map_r3_response_to_single_axis(frequency_response)
             frequency_responses.append([velocity, frequency_response[0], mapped_frequency_response])
             summed_max_index = np.argmax(mapped_frequency_response)
@@ -112,7 +113,7 @@ class LinearMovementVibrationsTest:
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         self._plot_relative_power(powers, outfile, axis, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
-        self._plot_peak_frequencies(peak_frequencies, outfile, axis, gcmd, d=gcmd.get_float("DROT", None))
+        self._plot_peak_frequencies(peak_frequencies, outfile, axis, gcmd, d=gcmd.get_float("DROT", None), step_distance=gcmd.get_float("STEPDIST", None))
         outfile = self._get_outfile_name(self.out_directory, "frequency_responses_v-range")
         self._plot_frequency_responses_over_velocity(frequency_responses, outfile, axis, gcmd)
 
@@ -123,7 +124,8 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-        frequency_response = calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120), gcmd.get_int("FMIN", 10))
+        frequency_response = calculate_frequencies(measurement_data, gcmd.get_int("FMAX", 120),
+                                                   gcmd.get_int("FMIN", 10))
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, ("linear_movement_responce_" + str(velocity) + "mmps_"))
@@ -199,22 +201,24 @@ class LinearMovementVibrationsTest:
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         plt.xlabel("velocity in mm/s")
         plt.ylabel("relative power")
-        plt.plot(data[:, 0], data[:, 1], marker='o',label="measurement data")
+        plt.plot(data[:, 0], data[:, 1], marker='o', label="measurement data")
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         plt.close('all')
 
     @staticmethod
-    def _plot_peak_frequencies(data, outfile, axis, gcmd, d=None):
+    def _plot_peak_frequencies(data, outfile, axis, gcmd, d=None, step_distance=None):
         data = np.array(data)
         plt.ioff()
         plt.title("Vibration peak frequencies for axis {}".format(axis))
         plt.xlabel("velocity in mm/s")
         plt.ylabel("peak frequency in Hz")
-        plt.plot(data[:, 0], data[:, 1], linestyle='--', marker='o',label="measurement data")
+        plt.plot(data[:, 0], data[:, 1], linestyle='--', marker='o', label="measurement data")
         plt.plot(data[:, 0], data[:, 0] / 2, label="teeth frequency 2gt-belt")
         if d is not None:
-            plt.plot(data[:, 0], data[:, 0] / (np.pi*d), label="full rotation idler/pulley")
+            plt.plot(data[:, 0], data[:, 0] / (np.pi * d), label="full rotation idler/pulley")
+        if step is not None:
+            plt.plot(data[:, 0], data[:, 0] / step_distance, label="full rotation idler/pulley")
         plt.legend()
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))

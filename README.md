@@ -4,7 +4,8 @@ This is a klipper extension allowing to measure vibrations on linear movements o
 ## Usage
 This extension adds two new GCODE commands:
 
-`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 10>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` will measure the vibrations frequency spectrum and create a file in the directory defined in the config as follows:
+`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 10>]  [DROT=<diameter of pulley or idler>] [STEPDIST=<travel distance of print head on a motor step>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
+This will measure the vibrations frequency spectrum and create a file in the directory defined in the config as follows:
 
 ![linear_movement_responce_150mmps_2022-10-30T17_53_59 439905](https://user-images.githubusercontent.com/20718963/199113335-7f21d635-22e4-4c77-abc3-ec5677382064.png)
 
@@ -12,14 +13,17 @@ The settings `XMIN, XMAX, YMINN, YMAX` overwrite the measurement rectangle defin
 
 The settings `STARTX, STARTY, ENDX, ENDY`allow to define a movement between any two points. Be aware that this causes the movement to possibly happen on a path different to the defined axis. In this case the axis is only used to find the adxl corresponding to the axis in case of multiple accelerometers. Also make sure that the defined points have a distance big enough to reach target velocity. 
 
-`DROT` defines the diameter of an idler or pulley. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys. 
+`DROT` defines the diameter of an idler or pulley in mm. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys. 
 Please be aware, that those frequencies are usually pretty low. To get useful results measure at the fastest speed possible and set `FMIN` to a low value as well as you need to choose the longest travel distance possible.
 
 `FMIN, FMAX` define the frequency range considered. All data outside this range are ignored. Be aware, due to the nature of an fft it does not make sense to use extremely low frequencies that correspond to less than half the measuring time. 
 
+`STEPDIST` set the distance the print head travels in a step of the motor to check for motor vibrations.
+
 **In most usecases it is sufficient to only use `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]`**
 
-`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [DROT=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [DROT=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [STEPDIST=<travel distance of print head on a motor step>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
+This goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
 
 ![frequency_responses_v-range2022-11-01T13_55_39 067495](https://user-images.githubusercontent.com/20718963/199251639-0972baed-a081-4a83-aa8b-13150158ad59.png)
 ![peak_frequencies2022-11-01T14_01_02 980854](https://user-images.githubusercontent.com/20718963/199255538-db5a9a7b-c424-44b3-b473-598dd4df22c5.png)
