@@ -13,7 +13,7 @@ The settings `XMIN, XMAX, YMINN, YMAX` overwrite the measurement rectangle defin
 
 The settings `STARTX, STARTY, ENDX, ENDY`allow to define a movement between any two points. Be aware that this causes the movement to possibly happen on a path different to the defined axis. In this case the axis is only used to find the adxl corresponding to the axis in case of multiple accelerometers. Also make sure that the defined points have a distance big enough to reach target velocity. 
 
-`DROT` defines the diameter of an idler or pulley in mm. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler or pulley. This is a way to identify decentered idlers or pulleys. 
+`D_IDLER` defines the diameter of an idler in mm. If set, the peak frequency graph will show a frequency corresponding to a full rotation of set idler. This is a way to identify decentered idlers. 
 Please be aware, that those frequencies are usually pretty low. To get useful results measure at the fastest speed possible and set `FMIN` to a low value as well as you need to choose the longest travel distance possible.
 
 `FMIN, FMAX` define the frequency range considered. All data outside this range are ignored. Be aware, due to the nature of an fft it does not make sense to use extremely low frequencies that correspond to less than half the measuring time. 
