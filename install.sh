@@ -21,3 +21,6 @@ function link_extension_file{
 
 echo -e "Installation Script for Klipper Linear Movement Analysis by MarschallMarc#6420"
 echo -e "Linking extension file"
+link_extension_file
+# exits on error but works, so dont check
+~/klippy-env/bin/pip install -v matplotlib
