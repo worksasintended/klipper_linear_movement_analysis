@@ -6,7 +6,7 @@ fi
 EXTENSION_TARGET="${HOME}/klipper/klippy/extras"
 SCRIPT_NAME="linear_movement_vibrations.py"
 
-function link_extension_file{
+function link_extension_file {
     if [ -d "${EXTENSION_TARGET}" ]; then
         rm -f "${EXTENSION_TARGET}/${SCRIPT_NAME}"
         ln -sf ${SCRIPT_NAME} "${KLIPPY_EXTRAS}/${SCRIPT_NAME}"
