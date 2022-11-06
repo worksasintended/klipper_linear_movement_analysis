@@ -239,6 +239,90 @@ class LinearMovementVibrationsTest:
         return mapped_frequency_response
 
     @staticmethod
+    def _get_limits_from_config(config):
+        x_min = int(config.get('x_min'))
+        x_max = int(config.get('x_max'))
+        y_min = int(config.get('y_min'))
+        y_max = int(config.get('y_max'))
+        return x_min, x_max, y_min, y_max
+
+    @staticmethod
+    def _get_limits_from_gcode(gcmd, limits):
+        x_min = gcmd.get_int("XMIN", limits[0])
+        x_max = gcmd.get_int("XMAX", limits[1])
+        y_min = gcmd.get_int("YMIN", limits[2])
+        y_max = gcmd.get_int("YMAX", limits[3])
+        return x_min, x_max, y_min, y_max
+
+    @staticmethod
+    def _get_move_positions(axis, limits, gcmd):
+        p1_x = p1_y = p2_x = p2_y = 0
+        if axis.lower() == "x":
+            p1_x = limits[0]
+            p1_y = limits[3] / 2
+            p2_x = limits[1]
+            p2_y = p1_y
+        elif axis.lower() == "y":
+            p1_x = limits[1] / 2
+            p1_y = limits[2]
+            p2_x = p1_x
+            p2_y = limits[3]
+        elif axis.lower() == "a":
+            p1_x = limits[0]
+            p1_y = limits[2]
+            p2_x = limits[1]
+            p2_y = limits[3]
+            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
+        elif axis.lower() == "b":
+            p1_x = limits[1]
+            p1_y = limits[2]
+            p2_x = limits[0]
+            p2_y = limits[3]
+            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
+
+        p1_x = gcmd.get_int("STARTX", p1_x)
+        p1_y = gcmd.get_int("STARTY", p1_y)
+        p2_x = gcmd.get_int("ENDX", p2_x)
+        p2_y = gcmd.get_int("ENDY", p2_y)
+        return [p1_x, p1_y], [p2_x, p2_y]
+
+    @staticmethod
+    def _get_velocity_range(gcmd):
+        vmin = gcmd.get_int("VMIN", None)
+        vmin = (vmin, 50)[vmin is None]
+        vmax = gcmd.get_int("VMAX", None)
+        vmax = (vmax, 300)[vmax is None]
+        vstep = gcmd.get_int("STEP", None)
+        vstep = (vstep, 10)[vstep is None]
+        return vmin, vmax, vstep
+
+    def _get_velocity(self, gcmd):
+        velocity = gcmd.get_int("VELOCITY", None)
+        velocity = (velocity, 150)[velocity is None]
+        if self.toolhead.max_velocity < velocity:
+            raise gcmd.error("Requested velocity '{}' succeeds printer limits".format(velocity))
+        return velocity
+
+    @staticmethod
+    def _get_axis(gcmd):
+        axis = gcmd.get("AXIS", None)
+        axis = (axis, "x")[axis is None]
+        if axis.lower() not in 'xyab':
+            raise gcmd.error("Unsupported axis'{}'".format(axis))
+        return axis
+
+    @staticmethod
+    def _get_outfile_name(directory, filename):
+        return directory + filename + datetime.datetime.today().isoformat() + ".png"
+
+    def connect(self):
+        self.toolhead = self.printer.lookup_object('toolhead')
+        # identical to ResonanceTester.connect, should be moved to helper function on merge
+        self.accel_chips = [
+            (chip_axis, self.printer.lookup_object(chip_name))
+            for chip_axis, chip_name in self.accel_chip_names]
+
+    @staticmethod
     def _plot_frequencies(data, outfile, velocity, axis, gcmd, d=None, step_distance=None, rotation_distance=None,
                           f_max=120):
         plt.ioff()
@@ -330,91 +414,6 @@ class LinearMovementVibrationsTest:
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         plt.close('all')
-
-    @staticmethod
-    def _get_limits_from_config(config):
-        x_min = int(config.get('x_min'))
-        x_max = int(config.get('x_max'))
-        y_min = int(config.get('y_min'))
-        y_max = int(config.get('y_max'))
-        return x_min, x_max, y_min, y_max
-
-    @staticmethod
-    def _get_limits_from_gcode(gcmd, limits):
-        x_min = gcmd.get_int("XMIN", limits[0])
-        x_max = gcmd.get_int("XMAX", limits[1])
-        y_min = gcmd.get_int("YMIN", limits[2])
-        y_max = gcmd.get_int("YMAX", limits[3])
-        return x_min, x_max, y_min, y_max
-
-    @staticmethod
-    def _get_move_positions(axis, limits, gcmd):
-        p1_x = p1_y = p2_x = p2_y = 0
-        if axis.lower() == "x":
-            p1_x = limits[0]
-            p1_y = limits[3] / 2
-            p2_x = limits[1]
-            p2_y = p1_y
-        elif axis.lower() == "y":
-            p1_x = limits[1] / 2
-            p1_y = limits[2]
-            p2_x = p1_x
-            p2_y = limits[3]
-        elif axis.lower() == "a":
-            p1_x = limits[0]
-            p1_y = limits[2]
-            p2_x = limits[1]
-            p2_y = limits[3]
-            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
-        elif axis.lower() == "b":
-            p1_x = limits[1]
-            p1_y = limits[2]
-            p2_x = limits[0]
-            p2_y = limits[3]
-            p2_x, p2_y = verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y)
-
-        p1_x = gcmd.get_int("STARTX", p1_x)
-        p1_y = gcmd.get_int("STARTY", p1_y)
-        p2_x = gcmd.get_int("ENDX", p2_x)
-        p2_y = gcmd.get_int("ENDY", p2_y)
-        return [p1_x, p1_y], [p2_x, p2_y]
-
-    @staticmethod
-    def _get_velocity_range(gcmd):
-        vmin = gcmd.get_int("VMIN", None)
-        vmin = (vmin, 50)[vmin is None]
-        vmax = gcmd.get_int("VMAX", None)
-        vmax = (vmax, 300)[vmax is None]
-        vstep = gcmd.get_int("STEP", None)
-        vstep = (vstep, 10)[vstep is None]
-        return vmin, vmax, vstep
-
-    def _get_velocity(self, gcmd):
-        velocity = gcmd.get_int("VELOCITY", None)
-        velocity = (velocity, 150)[velocity is None]
-        if self.toolhead.max_velocity < velocity:
-            raise gcmd.error("Requested velocity '{}' succeeds printer limits".format(velocity))
-        # TODO check if velocity is reachable
-        return velocity
-
-    @staticmethod
-    def _get_axis(gcmd):
-        axis = gcmd.get("AXIS", None)
-        axis = (axis, "x")[axis is None]
-        if axis.lower() not in 'xyab':
-            raise gcmd.error("Unsupported axis'{}'".format(axis))
-        return axis
-
-    @staticmethod
-    def _get_outfile_name(directory, filename):
-        return directory + filename + datetime.datetime.today().isoformat() + ".png"
-
-    def connect(self):
-        self.toolhead = self.printer.lookup_object('toolhead')
-        # identical to ResonanceTester.connect, should be moved to helper function on merge
-        self.accel_chips = [
-            (chip_axis, self.printer.lookup_object(chip_name))
-            for chip_axis, chip_name in self.accel_chip_names]
 
 
 def load_config(config):
