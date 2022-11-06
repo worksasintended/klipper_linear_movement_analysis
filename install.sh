@@ -1,5 +1,4 @@
-#!/bin/bash
-if [ "$EUID" == 0 ]
+if [ "$EUID" -eq 0 ]
   then echo "This script is not intended to be run as user root"
   exit 1
 fi
@@ -15,7 +14,6 @@ function link_extension_file{
         echo -e "${EXTENSION_TARGET} not found, exiting installation."
         exit 1
     fi
-
 }
 
 
