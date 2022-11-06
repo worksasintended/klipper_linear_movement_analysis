@@ -122,7 +122,7 @@ class LinearMovementVibrationsTest:
         axis = self._get_axis(gcmd)
         motion_report = self.printer.lookup_object('motion_report')
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
-        f_max = gcmd.get_int("FMAX", 200)
+        f_max = gcmd.get_int("FMAX", 2*v_max)
         powers = []
         peak_frequencies = []
         frequency_responses = []
@@ -133,7 +133,7 @@ class LinearMovementVibrationsTest:
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
             frequency_response = np.array(
-                calculate_frequencies(measurement_data, f_max, gcmd.get_int("FMIN", 10)))
+                calculate_frequencies(measurement_data, f_max, gcmd.get_int("FMIN", 5)))
             mapped_frequency_response = self._map_r3_response_to_single_axis(frequency_response)
             frequency_responses.append([velocity, frequency_response[0], mapped_frequency_response])
             summed_max_index = np.argmax(mapped_frequency_response)
@@ -165,9 +165,9 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(velocity, start_pos, end_pos, motion_report)
-        f_max = gcmd.get_int("FMAX", 120)
+        f_max = gcmd.get_int("FMAX", 2*velocity)
         frequency_response = calculate_frequencies(measurement_data, f_max,
-                                                   gcmd.get_int("FMIN", 10))
+                                                   gcmd.get_int("FMIN", 5))
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, ("linear_movement_responce_" + str(velocity) + "mmps_"))
@@ -330,25 +330,34 @@ class LinearMovementVibrationsTest:
         fig.suptitle("Vibrations while {}mm/s linear movement on {} axis".format(velocity, axis))
         ax = plt.subplot(111)
         box = ax.get_position()
-        ax.set_position([box.x0, box.y0 + box.height * 0.2, box.width, box.height * 0.85])
+        # shrink and move up to allow legend beneeth
+        ax.set_position([box.x0, box.y0 + box.height * 0.15, box.width, box.height * 0.85])
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         ax.set_xlabel("frequency in Hz")
         ax.set_ylabel("response")
-        ax.set_xlim(right=f_max)
+        ax.set_xlim(data[0][0],f_max)
         ax.axvline(x=velocity / 2, label="belt teeth", ls='--', color='tab:brown')
         if d is not None:
             ax.axvline(velocity / (np.pi * d), label="idler rotation", ls='--', color='tab:gray')
         if step_distance is not None:
             ax.axvline(velocity / rotation_distance, label="pulley rotation", ls='--', color='tab:olive')
         if rotation_distance is not None:
-            ax.axvline(velocity * step_distance / rotation_distance, label="motor step", ls='--', color='tab:purple')
+            ax.axvline(velocity * step_distance / rotation_distance, label="motor step", ls='--', color='tab:pink')
         ax.plot(data[0], data[1], label="x")
         ax.plot(data[0], data[2], label="y")
         ax.plot(data[0], data[3], label="z")
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=False, ncol=4)
+        #add second abscissa
+        ax2 = ax.twiny()
+        ax2.set_xlim(ax.get_xlim())
+        ax2.set_position([box.x0, box.y0 + box.height * 0.15, box.width, box.height * 0.85])
+        ax2.tick_params(axis="x",direction="in", pad=-15)
+        ax2.set_xticklabels(['{0:.2f}'.format(velocity/x) for x in ax.get_xticks()])
+        ax2.set_xlabel("pattern distance in mm")
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         plt.close('all')
+
 
     @staticmethod
     def _plot_relative_power(data, outfile, axis, gcmd):
@@ -388,6 +397,8 @@ class LinearMovementVibrationsTest:
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
         ax.set_yscale('log', nonposy='clip')
+        plt.axhline(y=f_max, color='tab:olive', linestyle='--', label="f_max")
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=False, ncol=3)
         ax.set_autoscaley_on(True)
         plt.autoscale(True)
         fig.suptitle("Vibration peak frequencies for axis {}, f_max = {}Hz  ".format(axis, f_max))
