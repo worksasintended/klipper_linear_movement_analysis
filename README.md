@@ -53,7 +53,7 @@ Please read above about the different options, as most of them are identical to 
 
 Log into your raspberry pi via ssh. Clone the git repo via
 ```
-git clone git@github.com:worksasintended/klipper_linear_movement_analysis.git
+git clone https://github.com/worksasintended/klipper_linear_movement_analysis.git
 ```
 Copy, paste and excecute the following command:
 ``` 
