@@ -339,6 +339,7 @@ class LinearMovementVibrationsTest:
         ax.axvline(x=velocity / 2, label="2gt belt pitch", ls='--', color='tab:brown')
         ax.axvline(x=velocity / 1.21, label="2gt belt teeth width", ls='--', color='black')
         ax.axvline(x=velocity / 0.80, label="2gt belt valley width", ls='--', color='tab:cyan')
+        ax.axvline(x=velocity / 0.80, label="2gt belt flat width", ls='--', color='tab:brown')
         if d is not None:
             ax.axvline(velocity / (np.pi * d), label="idler rotation", ls='--', color='tab:gray')
         if step_distance is not None:
@@ -391,6 +392,7 @@ class LinearMovementVibrationsTest:
         ax.plot(data[:, 0], data[:, 0] / 2, label="2gt belt pitch")
         ax.plot(data[:, 0], data[:, 0] / 1.21, label="2gt belt teeth width")
         ax.plot(data[:, 0], data[:, 0] / .8, label="2gt belt valley width")
+        ax.plot(data[:, 0], data[:, 0] / .4, label="2gt belt valley flat width")
         if d is not None:
             ax.plot(data[:, 0], data[:, 0] / (np.pi * d), label="idler rotation")
         if step_distance is not None:
