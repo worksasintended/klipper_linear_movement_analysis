@@ -4,10 +4,18 @@ This is a klipper extension allowing to measure vibrations on linear movements o
 ## Usage
 This extension adds two new GCODE commands:
 
-`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 10>]  [DROT=<diameter of pulley or idler>] [STEPDIST=<travel distance of print head on a motor step>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
+### `MEASURE_LINEAR_VIBRATIONS`
+
+**In most usecases it is sufficient to only use `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]`**
+
 This will measure the vibrations frequency spectrum and create a file in the directory defined in the config as follows:
 
-![linear_movement_responce_150mmps_2022-10-30T17_53_59 439905](https://user-images.githubusercontent.com/20718963/199113335-7f21d635-22e4-4c77-abc3-ec5677382064.png)
+![linear_movement_responce_500mmps_2022-11-06T17_09_49 535678](https://user-images.githubusercontent.com/20718963/200202115-f2bc1d8b-4c0a-4628-9fce-29a9f4677a4b.png)
+
+Full set of options:
+
+`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 2xVELOCITY>]  [D_IDLER=<diameter of idler>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
+
 
 The settings `XMIN, XMAX, YMINN, YMAX` overwrite the measurement rectangle defined in the config. 
 
@@ -18,30 +26,58 @@ Please be aware, that those frequencies are usually pretty low. To get useful re
 
 `FMIN, FMAX` define the frequency range considered. All data outside this range are ignored. Be aware, due to the nature of an fft it does not make sense to use extremely low frequencies that correspond to less than half the measuring time. 
 
-`STEPDIST` set the distance the print head travels in a step of the motor to check for motor vibrations.
 
-**In most usecases it is sufficient to only use `MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>]`**
-
-`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [DROT=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 10>] [FMAX=<maximum frequency considered default 120>] [STEPDIST=<travel distance of print head on a motor step>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
-This goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
-
-![frequency_responses_v-range2022-11-01T13_55_39 067495](https://user-images.githubusercontent.com/20718963/199251639-0972baed-a081-4a83-aa8b-13150158ad59.png)
-![peak_frequencies2022-11-01T14_01_02 980854](https://user-images.githubusercontent.com/20718963/199255538-db5a9a7b-c424-44b3-b473-598dd4df22c5.png)
-![relative_power2022-10-31T21_32_58 727183](https://user-images.githubusercontent.com/20718963/199114782-a5c26bd9-f85c-4b45-90e0-74596a00c371.png)
-
-Please read above about the different settings possible.   
+### `MEASURE_LINEAR_VIBRATIONS_RANGE`
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] `**
 
+This goes through a range of velocities, plots the frequency responses and calculates the power of the vibrations as well as the frequencies of the main peak for each tested velocity, creating plots as following:
+
+![frequency_responses_v-range2022-11-06T17_08_02 433594](https://user-images.githubusercontent.com/20718963/200202266-a883232b-1224-411b-a94e-f77ac19949a1.png)
+![peak_frequencies_logscale2022-11-06T17_07_59 372651](https://user-images.githubusercontent.com/20718963/200202268-af71abc2-f7da-4b48-abc4-52446ad53799.png)
+![peak_frequencies2022-11-06T17_07_59 372548](https://user-images.githubusercontent.com/20718963/200202269-74b2b992-c81d-4a02-8ba2-dcfa5e0c7d72.png)
+![relative_power2022-11-06T17_07_58 922808](https://user-images.githubusercontent.com/20718963/200202270-86e9d408-2246-4992-bf54-3dbf3c8bc380.png)
+
+
+Full set of options:
+
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]` 
+
+
+Please read above about the different options, as most of them are identical to `MEASURE_LINEAR_VIBRATIONS`.
+
+
+
 
 ## Installation
-This extension requires matplotlib. To install it login into your rpi using ssh and excecute the following command:
-```~/klippy-env/bin/pip install -v matplotlib```
-This will take a couple of minutes to run through and create some load on the rpi. Don't do this while printing. 
 
-Move the file `linear_movement_vibrations.py` (you can find it here in this repo) into the `klippy/extras` directory to install the extension. 
+Log into your raspberry pi via ssh. Clone the git repo via
+```
+git clone https://github.com/worksasintended/klipper_linear_movement_analysis.git
+```
+Copy, paste and excecute the following command:
+``` 
+bash klipper_linear_movement_analysis/install.sh
+```
+This will install the extension. The installation of matplotlib requires some time and creates significant load on the rpi, I suggest NOT to do this, while the rpi is used for printing. 
 
-Add the section `[linear_movement_vibrations]` to your `printer.cfg`
+To update the package via Moonraker or a web frontend, add this to your `moonraker.conf`:
+```
+[update_manager LinearMovevementAnalysis]
+type: git_repo
+path: ~/klipper_linear_movement_analysis
+primary_branch: main
+origin: https://github.com/worksasintended/klipper_linear_movement_analysis.git
+install_script: install.sh
+env: ~/klippy-env/bin/python
+requirements: requirements.txt
+managed_services: klipper
+
+```
+The moonraker config can either be accesed via ssh or via one of the common klipper webfronts, like Fluidd or Mainsail. 
+
+
+Add the section `[linear_movement_vibrations]` to your `printer.cfg` to activate the plugin
 Example configuration:
 ```
 [linear_movement_vibrations]
@@ -61,3 +97,4 @@ accel_chip_x: adxl345 rpi
 accel_chip_y: adxl345
 ```
 **After these steps, reboot your raspberry, as otherwhise the newly installed pythin libraries are not loaded into the env.**  
+

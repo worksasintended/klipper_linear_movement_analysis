@@ -201,7 +201,7 @@ class LinearMovementVibrationsTest:
     @staticmethod
     def _get_stepper_configs(config):
         stepper_config = []
-        for stepper in ['stepper_x', 'steper_y']:
+        for stepper in ['stepper_x', 'stepper_y']:
             stepper_config.append(config.getsection(stepper))
         return stepper_config
 
