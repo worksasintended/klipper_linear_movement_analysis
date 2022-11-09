@@ -402,7 +402,7 @@ class LinearMovementVibrationsTest:
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=False, ncol=3)
         plt.savefig(outfile)
         gcmd.respond_info("output written to {}".format(outfile))
-        ax.set_yscale('log', nonposy='clip')
+        ax.set_yscale('log')
         plt.axhline(y=f_max, color='tab:olive', linestyle='--', label="f_max")
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.13), fancybox=True, shadow=False, ncol=3)
         ax.set_autoscaley_on(True)
