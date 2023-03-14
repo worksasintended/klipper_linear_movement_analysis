@@ -86,7 +86,7 @@ x_min: 5
 x_max: 175
 y_min: 5
 y_max: 175
-output_directory: /home/pi/klipper_config/linear_vibrations/
+output_directory: /home/pi/printer_data/config/linear_vibrations/
 ```
 Make sure the defined output directory is writable. The one in the example configuration shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the web frontend, assuming you are using RatOS. Similar to the `input_shaper folder`, you can find it in the machine tab in the `config` root.  If you are not using RatOS and are unsure which directroy to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed.
 `x_min, x_max,y_min, y_max`define a triangle in which the measuremnts will be performend. 
