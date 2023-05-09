@@ -10,11 +10,10 @@ import datetime
 
 import matplotlib
 
-matplotlib.use("Agg")
 import numpy as np
 import os
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
 
 
 # calculates the mean square of 3d acceleration data summing up all three components
@@ -417,9 +416,10 @@ class LinearMovementVibrationsTest:
         data = np.array(data)
         plt.ioff()
         fig = plt.figure()
-        ax = Axes3D(fig)
+        ax = fig.add_subplot(projection='3d')
         fig.suptitle("Vibration peak frequencies for axis {}".format(axis))
-        plt.ticklabel_format(style='sci', axis='z', scilimits=(0, 0))
+        ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0))
+
         for velocity_sample in data:
             x = velocity_sample[1]
             y = velocity_sample[2]
