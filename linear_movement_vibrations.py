@@ -7,9 +7,11 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
 import datetime
+
 import numpy as np
 import os
 from matplotlib import pyplot as plt
+
 
 
 def calculate_total_power(data):
@@ -485,7 +487,9 @@ class LinearMovementVibrationsTest:
         plt.ioff()
         fig = plt.figure()
         ax = fig.add_subplot(projection='3d')
+
         fig.suptitle(f"Vibration peak frequencies for axis {axis}")
+
         ax.ticklabel_format(style='sci', axis='z', scilimits=(0, 0))
 
         for velocity_sample in data:
