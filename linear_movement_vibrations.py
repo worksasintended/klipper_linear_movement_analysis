@@ -200,19 +200,19 @@ class LinearMovementVibrationsTest:
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotter.plot_relative_power(powers, outfile, axis, gcmd)
+        plotlib.plot_relative_power(powers, outfile, axis, gcmd)
         outfile = self._get_outfile_name(
             self.out_directory, "peak_frequencies")
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale")
         rotation_dist, step_distance = self._get_step_distance(
             axis, self.stepper_configs)
-        plotter.plot_peak_frequencies(peak_frequencies, outfile, outfilelog, axis, gcmd,
+        plotlib.plot_peak_frequencies(peak_frequencies, outfile, outfilelog, axis, gcmd,
                                     d=gcmd.get_float("D_IDLER", None),
                                     step_distance=step_distance, rotation_distance=rotation_dist, f_max=f_max)
         outfile = self._get_outfile_name(
             self.out_directory, "frequency_responses_v-range")
-        plotter.plot_frequency_responses_over_velocity(
+        plotlib.plot_frequency_responses_over_velocity(
             frequency_responses, outfile, axis, gcmd)
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
@@ -238,7 +238,7 @@ class LinearMovementVibrationsTest:
             self.out_directory, ("linear_movement_response_" + str(velocity) + "mmps_"))
         rotation_dist, step_distance = self._get_step_distance(
             axis, self.stepper_configs)
-        plotter.plot_frequencies(frequency_response, outfile, velocity, axis, gcmd, d=gcmd.get_float("D_IDLER", None),
+        plotlib.plot_frequencies(frequency_response, outfile, velocity, axis, gcmd, d=gcmd.get_float("D_IDLER", None),
                                step_distance=step_distance, rotation_distance=rotation_dist, f_max=f_max)
 
     def _measure_linear_movement_vibrations(self, velocity, start_pos, end_pos, motion_report):
