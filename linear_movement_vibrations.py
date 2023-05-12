@@ -7,11 +7,9 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
 import datetime
-
 import numpy as np
 import os
 from matplotlib import pyplot as plt
-
 
 
 def calculate_total_power(data):
@@ -84,9 +82,8 @@ def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
     return p2_x, p2_y
 
 
-
 def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
-    """source: stepper.py """    
+    """source: stepper.py """
     if units_in_radians is None:
         # Caller doesn't know if units are in radians - infer it
         rd = config.get('rotation_distance', None, note_valid=False)
@@ -109,7 +106,7 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
 
 
 def parse_gear_ratio(config, note_valid):
-    """source: stepper.py """    
+    """source: stepper.py """
 
     gear_ratio = config.getlists('gear_ratio', (), seps=(':', ','), count=2,
                                  parser=float, note_valid=note_valid)
@@ -122,6 +119,7 @@ def parse_gear_ratio(config, note_valid):
 class LinearMovementVibrationsTest:
     """TODO: Docstring 
     """
+
     def __init__(self, config):
         self.printer = config.get_printer()
         self.printer.register_event_handler("klippy:connect", self.connect)
@@ -174,10 +172,15 @@ class LinearMovementVibrationsTest:
             peak_frequencies.append([velocity, peak_frequency])
             power = calculate_total_power(measurement_data)
             powers.append([velocity, power])
-            # reverse movement
             start_pos_last = start_pos
             start_pos = end_pos
             end_pos = start_pos_last
+
+        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
+            outfile = self._get_outfile_name('', 'frequency_responses', '')
+            self._write_data_outfile(
+                self.out_directory, gcmd, outfile, frequency_responses)
+
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
@@ -207,6 +210,12 @@ class LinearMovementVibrationsTest:
         f_max = gcmd.get_int("FMAX", 2*velocity)
         frequency_response = calculate_frequencies(measurement_data, f_max,
                                                    gcmd.get_int("FMIN", 5))
+
+        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
+            outfile = self._get_outfile_name('', 'frequency_response', '')
+            self._write_data_outfile(
+                self.out_directory, gcmd, outfile, frequency_response)
+
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(
@@ -247,6 +256,16 @@ class LinearMovementVibrationsTest:
         self.accel_chips = [
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names]
+
+    @staticmethod
+    def _write_data_outfile(directory, gcmd, fname, data):
+        """Write data into out_directory/raw_data/fname by np.savez."""
+
+        if not os.path.exists(directory+'raw_data'):
+            os.makedirs(directory + 'raw_data')
+        outfile = directory + 'raw_data/'+fname
+        np.savez(outfile, data=np.array(data, dtype=object))
+        gcmd.respond_info(f"data output written to {outfile}")
 
     @staticmethod
     def _get_stepper_configs(config):
@@ -366,10 +385,8 @@ class LinearMovementVibrationsTest:
         return axis
 
     @staticmethod
-    def _get_outfile_name(directory, filename):
-        return directory + filename + datetime.datetime.today().isoformat() + ".png"
-
-    
+    def _get_outfile_name(directory, fname, extension=".png"):
+        return directory + fname + datetime.datetime.today().isoformat() + extension
 
     @staticmethod
     def _plot_frequencies(data, outfile, velocity, axis, gcmd, d=None, step_distance=None, rotation_distance=None,
