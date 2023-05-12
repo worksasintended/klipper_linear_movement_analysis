@@ -2,3 +2,6 @@ test.py
 klippy14.log
 error_log.log
 .vscode/settings.json
+data exploration/frequency_responses.npz
+linear_movement_vibrations.py
+test.npz
