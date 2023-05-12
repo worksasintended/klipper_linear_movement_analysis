@@ -1,7 +1,6 @@
-test.py
-klippy14.log
+.vscode
 error_log.log
-.vscode/settings.json
-data exploration/frequency_responses.npz
-linear_movement_vibrations.py
+klippy14.log
 test.npz
+data exploration/frequency_responses.npz
+data exploration/test.py

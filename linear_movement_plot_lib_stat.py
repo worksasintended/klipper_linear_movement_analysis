@@ -1,8 +1,16 @@
+"""Static Plot lib module for linear_movement_vibrations"""
+
+
+# Copyright (C) 2022  Marc Marschall <discrod:MarschallMarc#6420>
+#
+# This file may be distributed under the terms of the GNU GPLv3 license.
+
 from matplotlib import pyplot as plt
 import numpy as np
 
+
 def plot_frequencies(data, outfile, velocity, axis, gcmd, d=None, step_distance=None, rotation_distance=None,
-                        f_max=120):
+                     f_max=120):
     plt.ioff()
     fig = plt.figure()
     fig.suptitle(
@@ -17,22 +25,22 @@ def plot_frequencies(data, outfile, velocity, axis, gcmd, d=None, step_distance=
     ax.set_ylabel("response")
     ax.set_xlim(data[0][0], f_max)
     ax.axvline(x=velocity / 2, label="2gt belt pitch",
-                ls='--', color='tab:brown')
+               ls='--', color='tab:brown')
     ax.axvline(x=velocity / 1.21, label="2gt belt teeth width",
-                ls='--', color='black')
+               ls='--', color='black')
     ax.axvline(x=velocity / 0.80, label="2gt belt valley width",
-                ls='--', color='tab:cyan')
+               ls='--', color='tab:cyan')
     ax.axvline(x=velocity / 0.40, label="2gt belt flat width",
-                ls='--', color='tab:brown')
+               ls='--', color='tab:brown')
     if d is not None:
         ax.axvline(velocity / (np.pi * d),
-                    label="idler rotation", ls='--', color='tab:gray')
+                   label="idler rotation", ls='--', color='tab:gray')
     if step_distance is not None:
         ax.axvline(velocity / rotation_distance,
-                    label="pulley rotation", ls='--', color='tab:olive')
+                   label="pulley rotation", ls='--', color='tab:olive')
     if rotation_distance is not None:
         ax.axvline(velocity * step_distance / rotation_distance,
-                    label="motor step", ls='--', color='tab:pink')
+                   label="motor step", ls='--', color='tab:pink')
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
     ax.plot(data[0], data[3], label="z")
@@ -42,7 +50,7 @@ def plot_frequencies(data, outfile, velocity, axis, gcmd, d=None, step_distance=
     ax2 = ax.twiny()
     ax2.set_xlim(ax.get_xlim())
     ax2.set_position([box.x0, box.y0 + box.height *
-                        0.18, box.width, box.height * 0.85])
+                      0.18, box.width, box.height * 0.85])
     ax2.tick_params(axis="x", direction="in", pad=-15)
     ax2.set_xticklabels([f'{velocity/x:.2f}'
                         for x in ax.get_xticks()])
@@ -66,7 +74,7 @@ def plot_relative_power(data, outfile, axis, gcmd):
 
 
 def plot_peak_frequencies(data, outfile, outfilelog, axis, gcmd, d=None, step_distance=None,
-                            rotation_distance=None, f_max=200):
+                          rotation_distance=None, f_max=200):
     data = np.array(data)
     plt.ioff()
     fig = plt.figure()
