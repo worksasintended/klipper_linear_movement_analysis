@@ -10,11 +10,8 @@
 
 import datetime
 import os
-
 import numpy as np
-
 from . import linear_movement_plot_lib_stat as plotlib
-
 
 def calculate_total_power(data):
     """Calculate the mean square of 3d acceleration data summing up all three components.
@@ -87,7 +84,8 @@ def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
 
 
 def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
-    """source: stepper.py"""
+    """source: stepper.py """
+
     if units_in_radians is None:
         # Caller doesn't know if units are in radians - infer it
         rd = config.get("rotation_distance", None, note_valid=False)
@@ -113,7 +111,8 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
 
 
 def parse_gear_ratio(config, note_valid):
-    """source: stepper.py"""
+    """source: stepper.py """
+
 
     gear_ratio = config.getlists(
         "gear_ratio", (), seps=(":", ","), count=2, parser=float, note_valid=note_valid
@@ -331,6 +330,16 @@ class LinearMovementVibrationsTest:
         if not os.path.exists(directory + "raw_data"):
             os.makedirs(directory + "raw_data")
         outfile = directory + "raw_data/" + fname
+        np.savez(outfile, data=np.array(data, dtype=object))
+        gcmd.respond_info(f"data output written to {outfile}")
+
+    @staticmethod
+    def _write_data_outfile(directory, gcmd, fname, data):
+        """Write data into out_directory/raw_data/fname by np.savez."""
+
+        if not os.path.exists(directory+'raw_data'):
+            os.makedirs(directory + 'raw_data')
+        outfile = directory + 'raw_data/'+fname
         np.savez(outfile, data=np.array(data, dtype=object))
         gcmd.respond_info(f"data output written to {outfile}")
 
