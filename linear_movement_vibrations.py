@@ -212,8 +212,6 @@ class LinearMovementVibrationsTest:
             start_pos = end_pos
             end_pos = start_pos_last
 
-        
-        
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
@@ -262,7 +260,6 @@ class LinearMovementVibrationsTest:
         frequency_response = calculate_frequencies(
             measurement_data, f_max, gcmd.get_int("FMIN", 5)
         )
-
 
         if not os.path.exists(self.out_directory):
             os.makedirs(self.out_directory)
