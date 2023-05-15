@@ -1,6 +1,1 @@
-.vscode
-error_log.log
-klippy14.log
-test.npz
-data exploration/frequency_responses.npz
-data exploration/test.py
+.log
