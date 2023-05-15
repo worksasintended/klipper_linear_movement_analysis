@@ -212,14 +212,16 @@ class LinearMovementVibrationsTest:
             start_pos = end_pos
             end_pos = start_pos_last
 
+        
+        
+        if not os.path.exists(self.out_directory):
+            os.makedirs(self.out_directory)
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", "frequency_responses", "")
             self._write_data_outfile(
                 self.out_directory, gcmd, outfile, frequency_responses
             )
 
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         plotlib.plot_relative_power(powers, outfile, axis, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
@@ -261,14 +263,14 @@ class LinearMovementVibrationsTest:
             measurement_data, f_max, gcmd.get_int("FMIN", 5)
         )
 
+
+        if not os.path.exists(self.out_directory):
+            os.makedirs(self.out_directory)
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", "frequency_response", "")
             self._write_data_outfile(
                 self.out_directory, gcmd, outfile, frequency_response
             )
-
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
         outfile = self._get_outfile_name(
             self.out_directory, ("linear_movement_response_" + str(velocity) + "mmps_")
         )
