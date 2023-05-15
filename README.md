@@ -99,3 +99,6 @@ accel_chip_y: adxl345
 ```
 **After these steps, reboot your raspberry, as otherwise the newly installed python libraries are not loaded into the env.**  
 
+## Coding style
+- For docstrings, we follow NumPy's "Docstring Standard" and Python's "Docstring Conventions".
+- For formatting, we use [`black`](https://black.readthedocs.io/). To implement `black` in your IDE, [find your editor](https://black.readthedocs.io/en/stable/integrations/editors.html)
