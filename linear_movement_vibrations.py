@@ -27,7 +27,7 @@ def calculate_total_power(data):
     pd = 0
     norm = len(data)
     for t, x, y, z in data:
-        pd += (abs(x) + abs(y) + abs(z)) * (abs(x) + abs(y) + abs(z)) / norm
+        pd += (x**2 + y**2 + z**2) / norm
     return pd
 
 
@@ -55,7 +55,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
+        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))**2
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
