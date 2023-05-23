@@ -75,32 +75,37 @@ def plot_relative_power(data, outfile, axis, gcmd):
 
 def plot_peak_frequencies(data, outfile, outfilelog, axis, gcmd, d=None, step_distance=None,
                           rotation_distance=None, f_max=200):
-    data = np.array(data)
     plt.ioff()
-    fig = plt.figure()
+    fig, ax = plt.subplots()
+    velocities, peak_freqs, peak_ffts = zip(*data)
+    velocities = np.concatenate(velocities)
+    peak_ffts = np.concatenate(peak_ffts)
+    peak_ffts = (peak_ffts**(0.8))
+    normalized_peak_heights = (peak_ffts-np.amin(peak_ffts))/(np.amax(peak_ffts)-np.amin(peak_ffts))
+    peak_height_to_size = 90*normalized_peak_heights
+    scatter = ax.scatter(velocities, peak_freqs, c='black', s=peak_height_to_size, cmap='magma', marker='o')
+
     fig.suptitle(f"Vibration peak frequencies for axis {axis}")
-    ax = plt.subplot(111)
+
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height *
                     0.18, box.width, box.height * 0.85])
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, f_max)
-    ax.plot(data[:, 0], data[:, 1], linestyle='--',
-            marker='o', label="measurement data")
-    ax.plot(data[:, 0], data[:, 0] / 2, label="2gt belt pitch")
-    ax.plot(data[:, 0], data[:, 0] / 1.21, label="2gt belt teeth width")
-    ax.plot(data[:, 0], data[:, 0] / .8, label="2gt belt valley width")
-    ax.plot(data[:, 0], data[:, 0] / .4,
+    ax.plot(velocities, velocities / 2, label="2gt belt pitch")
+    ax.plot(velocities, velocities / 1.21, label="2gt belt teeth width")
+    ax.plot(velocities, velocities / .8, label="2gt belt valley width")
+    ax.plot(velocities, velocities / .4,
             label="2gt belt valley flat width")
     if d is not None:
-        ax.plot(data[:, 0], data[:, 0] /
+        ax.plot(velocities, velocities /
                 (np.pi * d), label="idler rotation")
     if step_distance is not None:
-        ax.plot(data[:, 0], data[:, 0] /
+        ax.plot(velocities, velocities /
                 rotation_distance, label="pulley rotation")
     if rotation_distance is not None:
-        ax.plot(data[:, 0], data[:, 0] * step_distance /
+        ax.plot(velocities, velocities * step_distance /
                 rotation_distance, label="motor step")
     ax.legend(loc='upper center', bbox_to_anchor=(
         0.5, -0.13), fancybox=True, shadow=False, ncol=3)

@@ -11,6 +11,7 @@
 import datetime
 import os
 import numpy as np
+from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
 
 def calculate_total_power(data):
@@ -182,6 +183,7 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
+        top_peak = gcmd.get_int("FREQS_PER_V", 3)
         powers = []
         peak_frequencies = []
         frequency_responses = []
@@ -202,9 +204,13 @@ class LinearMovementVibrationsTest:
             frequency_responses.append(
                 [velocity, frequency_response[0], mapped_frequency_response]
             )
-            summed_max_index = np.argmax(mapped_frequency_response)
-            peak_frequency = frequency_response[0][summed_max_index]
-            peak_frequencies.append([velocity, peak_frequency])
+            
+            #props is a dictionary which contains the peak information (see scipy.signals.find_peaks docu)
+            peak_idx, props = signal.find_peaks(mapped_frequency_response**(0.4), height=(0.*np.amax(mapped_frequency_response)**0.4,), distance=1)
+    
+            top_peaks = np.argsort((mapped_frequency_response**(0.4))[peak_idx])[::-1][0:top_peak]
+            peak_frequencies.append([np.repeat(velocity, len(top_peaks)), frequency_response[0][peak_idx][top_peaks], (mapped_frequency_response**0.4)[peak_idx][top_peaks]])
+                    
             power = calculate_total_power(measurement_data)
             powers.append([velocity, power])
             start_pos_last = start_pos
