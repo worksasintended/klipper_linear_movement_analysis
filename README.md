@@ -28,6 +28,8 @@ Please be aware, that those frequencies are usually pretty low. To get useful re
 
 `EXPORT_FFTDATA=1` enables fft data file exportation. In this case, a .npz file in output_directory/raw_data is returned, which can be locally imported after downloading by using e.g. data = numpy.load('fname.npz', allow_pickle=True)['data'].  data array has the form [[velocity, frequencies, fft_data] for velocity in velocities].
 
+`FREQS_PER_V=3` specifies the number (default 3) of displayed vibration frequencies that dominate the fft response per velocity. 
+
 ### `MEASURE_LINEAR_VIBRATIONS_RANGE`
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of velocity changes>] `**
@@ -42,7 +44,10 @@ This goes through a range of velocities, plots the frequency responses, and calc
 
 Full set of options:
 
-`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]` 
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>] [FREQS_PER_V=<number of freqs per velocity> default is 3]` 
+
+
+`FREQS_PER_V` specifies the number (default 3) of displayed vibration frequencies that dominate the fft response per velocity. `FREQS_PER_V=-1` plots all frequency responses (only recommended for more than 100 velocity points)
 
 
 Please read above about the different options, as most of them are identical to `MEASURE_LINEAR_VIBRATIONS`.
@@ -60,7 +65,7 @@ Copy, paste, and excecute the following command:
 ``` 
 bash klipper_linear_movement_analysis/install.sh
 ```
-This will install the extension. The installation of matplotlib requires some time and creates significant load on the rpi, I suggest NOT doing this, while the rpi is used for printing. 
+This will install the extension. The installation of matplotlib and scipy requires some time and creates significant load on the rpi, I suggest NOT doing this, while the rpi is used for printing. 
 
 To update the package via Moonraker or a web frontend, add this to your `moonraker.conf`:
 ```
@@ -101,4 +106,4 @@ accel_chip_y: adxl345
 
 ## Coding style
 - For docstrings, we follow NumPy's "Docstring Standard" and Python's "Docstring Conventions".
-- For formatting, we use [`black`](https://black.readthedocs.io/). To implement `black` in your IDE, [find your editor](https://black.readthedocs.io/en/stable/integrations/editors.html)
+- For formatting, we use [`black`](https://black.readthedocs.io/). To use `black` in your IDE, [find your editor](https://black.readthedocs.io/en/stable/integrations/editors.html)
