@@ -47,7 +47,7 @@ Full set of options:
 `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>] [FREQS_PER_V=<number of freqs per velocity> default is 3]` 
 
 
-`FREQS_PER_V` specifies the number (default 3) of displayed vibration frequencies that dominate the fft response per velocity. `FREQS_PER_V=-1` plots all frequency responses (only recommended for more than 100 velocity points)
+`FREQS_PER_V` specifies the number (default 3) of displayed vibration frequencies that dominate the fft response per velocity. `FREQS_PER_V=-1` plots all frequency response peaks (only recommended for more than 100 velocity points)
 
 
 Please read above about the different options, as most of them are identical to `MEASURE_LINEAR_VIBRATIONS`.
