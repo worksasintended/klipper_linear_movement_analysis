@@ -110,9 +110,8 @@ def plot_peak_frequencies(
     peak_ffts = np.concatenate(peak_ffts)
     peak_freqs = np.concatenate(peak_freqs)
     peak_ffts = peak_ffts ** (0.8)
-    normalized_peak_heights = (peak_ffts - np.amin(peak_ffts)) / (
-        np.amax(peak_ffts) - np.amin(peak_ffts)
-    )
+    min_fft = np.amin(peak_ffts)
+    normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
     peak_height_to_size = 90 * normalized_peak_heights
     scatter = ax.scatter(
         velocities, peak_freqs, c="black", s=peak_height_to_size, marker="o"
