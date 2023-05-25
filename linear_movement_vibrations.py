@@ -13,8 +13,9 @@ import os
 import numpy as np
 from . import linear_movement_plot_lib_stat as plotlib
 
+
 def calculate_total_power(data):
-    """Calculate the mean square of 3d acceleration data summing up all three components.
+    """Calculate the mean square of 3d acceleration data for each vibration component.
 
     Parameters
     ----------
@@ -22,12 +23,11 @@ def calculate_total_power(data):
 
     Returns
     -------
-    pd : float
+    pd : positive float
     """
-    pd = 0
+
     norm = len(data)
-    for t, x, y, z in data:
-        pd += (abs(x) + abs(y) + abs(z)) * (abs(x) + abs(y) + abs(z)) / norm
+    pd = (data**2).sum(axis=0) / norm
     return pd
 
 
@@ -84,7 +84,7 @@ def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
 
 
 def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
-    """source: stepper.py """
+    """source: stepper.py"""
 
     if units_in_radians is None:
         # Caller doesn't know if units are in radians - infer it
@@ -111,8 +111,7 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
 
 
 def parse_gear_ratio(config, note_valid):
-    """source: stepper.py """
-
+    """source: stepper.py"""
 
     gear_ratio = config.getlists(
         "gear_ratio", (), seps=(":", ","), count=2, parser=float, note_valid=note_valid
@@ -182,12 +181,13 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
-        powers = []
+        velocity_range = range(v_min, v_max + 1, v_step)
+        powers = np.zeros((len(velocity_range), 4))
         peak_frequencies = []
         frequency_responses = []
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
-        for velocity in range(v_min, v_max + 1, v_step):
+        for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
@@ -206,7 +206,8 @@ class LinearMovementVibrationsTest:
             peak_frequency = frequency_response[0][summed_max_index]
             peak_frequencies.append([velocity, peak_frequency])
             power = calculate_total_power(measurement_data)
-            powers.append([velocity, power])
+            powers[vel_idx, 1:4] = power
+            powers[vel_idx, 0] = velocity
             start_pos_last = start_pos
             start_pos = end_pos
             end_pos = start_pos_last
@@ -337,9 +338,9 @@ class LinearMovementVibrationsTest:
     def _write_data_outfile(directory, gcmd, fname, data):
         """Write data into out_directory/raw_data/fname by np.savez."""
 
-        if not os.path.exists(directory+'raw_data'):
-            os.makedirs(directory + 'raw_data')
-        outfile = directory + 'raw_data/'+fname
+        if not os.path.exists(directory + "raw_data"):
+            os.makedirs(directory + "raw_data")
+        outfile = directory + "raw_data/" + fname
         np.savez(outfile, data=np.array(data, dtype=object))
         gcmd.respond_info(f"data output written to {outfile}")
 
