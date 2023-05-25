@@ -69,7 +69,7 @@ type: git_repo
 path: ~/klipper_linear_movement_analysis
 primary_branch: fix-install.sh
 origin: https://github.com/worksasintended/klipper_linear_movement_analysis.git
-install_script: install.sh
+install_script: fix-install.sh
 env: ~/klippy-env/bin/python
 requirements: requirements.txt
 managed_services: klipper
