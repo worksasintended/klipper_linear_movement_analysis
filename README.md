@@ -60,7 +60,7 @@ Copy, paste, and excecute the following command:
 ``` 
 bash klipper_linear_movement_analysis/install.sh
 ```
-This will install the extension. The installation of matplotlib requires some time and creates significant load on the rpi, I suggest NOT doing this, while the rpi is used for printing. 
+This will install the extension. The installation of matplotlib and scipy requires some time and creates significant load on the rpi, I suggest NOT doing this, while the rpi is used for printing. 
 
 To update the package via Moonraker or a web frontend, add this to your `moonraker.conf`:
 ```
@@ -69,7 +69,7 @@ type: git_repo
 path: ~/klipper_linear_movement_analysis
 primary_branch: fix-install.sh
 origin: https://github.com/worksasintended/klipper_linear_movement_analysis.git
-install_script: fix-install.sh
+install_script: install.sh
 env: ~/klippy-env/bin/python
 requirements: requirements.txt
 managed_services: klipper
