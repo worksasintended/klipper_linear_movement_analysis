@@ -118,7 +118,6 @@ def plot_peak_frequencies(
     )
 
     fig.suptitle(f"Vibration peak frequencies for axis {axis}")
-
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax.set_xlabel("velocity in mm/s")

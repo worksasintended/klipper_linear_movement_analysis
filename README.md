@@ -28,7 +28,6 @@ Please be aware, that those frequencies are usually pretty low. To get useful re
 
 `EXPORT_FFTDATA=1` enables fft data file exportation. In this case, a .npz file in output_directory/raw_data is returned, which can be locally imported after downloading by using e.g. data = numpy.load('fname.npz', allow_pickle=True)['data'].  data array has the form [[velocity, frequencies, fft_data] for velocity in velocities].
 
-
 ### `MEASURE_LINEAR_VIBRATIONS_RANGE`
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of velocity changes>] `**

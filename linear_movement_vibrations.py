@@ -207,22 +207,23 @@ class LinearMovementVibrationsTest:
                 [velocity, frequency_response[0], mapped_frequency_response]
             )
 
-            # props is a dictionary which contains the peak information (see scipy.signals.find_peaks docu)
-            peak_idx, props = signal.find_peaks(
+            # peak_properties is a dictionary which contains the peak information (see scipy.signals.find_peaks docu)
+            peak_idxs, peak_properties = signal.find_peaks(
                 mapped_frequency_response,
                 height=(0.0 * np.amax(mapped_frequency_response),),
                 distance=1,
             )
-            if freqs_per_v > len(peak_idx):
+            mapped_frequency_response_peaks = mapped_frequency_response[peak_idxs]
+            if freqs_per_v > len(peak_idxs):
                 freqs_per_v = -1
-            freqs_per_vs = np.argsort((mapped_frequency_response)[peak_idx])[::-1][
-                0:freqs_per_v
-            ]
+            freqs_per_vs = np.argpartition(
+                mapped_frequency_response_peaks, int(-freqs_per_v)
+            )[int(-freqs_per_v) :]
             peak_frequencies.append(
                 [
                     np.repeat(velocity, len(freqs_per_vs)),
-                    frequency_response[0][peak_idx][freqs_per_vs],
-                    (mapped_frequency_response)[peak_idx][freqs_per_vs],
+                    frequency_response[0][peak_idxs][freqs_per_vs],
+                    mapped_frequency_response_peaks[freqs_per_vs],
                 ]
             )
 
