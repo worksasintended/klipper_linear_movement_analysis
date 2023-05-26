@@ -11,7 +11,9 @@
 import datetime
 import os
 import numpy as np
+from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
+
 
 def calculate_total_power(data):
     """Calculate the mean square of 3d acceleration data summing up all three components.
@@ -27,7 +29,7 @@ def calculate_total_power(data):
     pd = 0
     norm = len(data)
     for t, x, y, z in data:
-        pd += (abs(x) + abs(y) + abs(z)) * (abs(x) + abs(y) + abs(z)) / norm
+        pd += (x**2 + y**2 + z**2) / norm
     return pd
 
 
@@ -55,7 +57,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
+        ord_fourier = np.abs(np.fft.rfft(data[:, axis])) 
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
@@ -84,7 +86,7 @@ def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
 
 
 def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
-    """source: stepper.py """
+    """source: stepper.py"""
 
     if units_in_radians is None:
         # Caller doesn't know if units are in radians - infer it
@@ -111,8 +113,7 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
 
 
 def parse_gear_ratio(config, note_valid):
-    """source: stepper.py """
-
+    """source: stepper.py"""
 
     gear_ratio = config.getlists(
         "gear_ratio", (), seps=(":", ","), count=2, parser=float, note_valid=note_valid
@@ -182,6 +183,9 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
+        freqs_per_v = gcmd.get_int("FREQS_PER_V", 3)
+        if freqs_per_v == 0:
+            freqs_per_v = 1
         powers = []
         peak_frequencies = []
         frequency_responses = []
@@ -202,9 +206,27 @@ class LinearMovementVibrationsTest:
             frequency_responses.append(
                 [velocity, frequency_response[0], mapped_frequency_response]
             )
-            summed_max_index = np.argmax(mapped_frequency_response)
-            peak_frequency = frequency_response[0][summed_max_index]
-            peak_frequencies.append([velocity, peak_frequency])
+
+            # peak_properties is a dictionary which contains the peak information (see scipy.signals.find_peaks docu)
+            peak_idxs, peak_properties = signal.find_peaks(
+                mapped_frequency_response,
+                height=(0.0 * np.amax(mapped_frequency_response),),
+                distance=1,
+            )
+            mapped_frequency_response_peaks = mapped_frequency_response[peak_idxs]
+            if freqs_per_v > len(peak_idxs):
+                freqs_per_v = -1
+            freqs_per_vs = np.argpartition(
+                mapped_frequency_response_peaks, int(-freqs_per_v)
+            )[int(-freqs_per_v) :]
+            peak_frequencies.append(
+                [
+                    np.repeat(velocity, len(freqs_per_vs)),
+                    frequency_response[0][peak_idxs][freqs_per_vs],
+                    mapped_frequency_response_peaks[freqs_per_vs],
+                ]
+            )
+
             power = calculate_total_power(measurement_data)
             powers.append([velocity, power])
             start_pos_last = start_pos
@@ -337,9 +359,9 @@ class LinearMovementVibrationsTest:
     def _write_data_outfile(directory, gcmd, fname, data):
         """Write data into out_directory/raw_data/fname by np.savez."""
 
-        if not os.path.exists(directory+'raw_data'):
-            os.makedirs(directory + 'raw_data')
-        outfile = directory + 'raw_data/'+fname
+        if not os.path.exists(directory + "raw_data"):
+            os.makedirs(directory + "raw_data")
+        outfile = directory + "raw_data/" + fname
         np.savez(outfile, data=np.array(data, dtype=object))
         gcmd.respond_info(f"data output written to {outfile}")
 
@@ -388,9 +410,9 @@ class LinearMovementVibrationsTest:
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
         combined_array = np.array(
-            [frequency_response[1], frequency_response[2], frequency_response[3]]
+            [frequency_response[1]** 2, frequency_response[2]** 2, frequency_response[3]** 2]
         )
-        mapped_frequency_response = combined_array.sum(axis=0)
+        mapped_frequency_response = np.sqrt(combined_array.sum(axis=0))
         return mapped_frequency_response
 
     @staticmethod
@@ -462,7 +484,7 @@ class LinearMovementVibrationsTest:
     def _get_axis(gcmd):
         axis = gcmd.get("AXIS", None)
         axis = (axis, "x")[axis is None]
-        if axis.lower() not in "xyab":
+        if axis.lower() not in ["x", "y", "a", "b"]:
             raise gcmd.error(f"Unsupported axis'{axis}'")
         return axis
 
