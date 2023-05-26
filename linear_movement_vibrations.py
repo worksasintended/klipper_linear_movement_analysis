@@ -229,7 +229,7 @@ class LinearMovementVibrationsTest:
             )
 
             power = calculate_total_power(measurement_data)
-            powers[vel_idx, 1:4] = power
+            powers[vel_idx, 1:4] = power[1:4]
             powers[vel_idx, 0] = velocity
             start_pos_last = start_pos
             start_pos = end_pos
