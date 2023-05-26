@@ -57,7 +57,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis])) ** 2
+        ord_fourier = np.abs(np.fft.rfft(data[:, axis])) 
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
@@ -410,10 +410,10 @@ class LinearMovementVibrationsTest:
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
         combined_array = np.array(
-            [frequency_response[1], frequency_response[2], frequency_response[3]]
+            [frequency_response[1]** 2, frequency_response[2]** 2, frequency_response[3]** 2]
         )
-        mapped_frequency_response = combined_array.sum(axis=0)
-        return np.sqrt(mapped_frequency_response)
+        mapped_frequency_response = np.sqrt(combined_array.sum(axis=0))
+        return mapped_frequency_response
 
     @staticmethod
     def _get_limits_from_config(config):
