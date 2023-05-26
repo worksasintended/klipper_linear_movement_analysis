@@ -11,7 +11,9 @@
 import datetime
 import os
 import numpy as np
+from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
+
 
 
 def calculate_total_power(data):
@@ -55,7 +57,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
+        ord_fourier = np.abs(np.fft.rfft(data[:, axis])) 
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
@@ -202,9 +204,27 @@ class LinearMovementVibrationsTest:
             frequency_responses.append(
                 [velocity, frequency_response[0], mapped_frequency_response]
             )
-            summed_max_index = np.argmax(mapped_frequency_response)
-            peak_frequency = frequency_response[0][summed_max_index]
-            peak_frequencies.append([velocity, peak_frequency])
+
+            # peak_properties is a dictionary which contains the peak information (see scipy.signals.find_peaks docu)
+            peak_idxs, peak_properties = signal.find_peaks(
+                mapped_frequency_response,
+                height=(0.0 * np.amax(mapped_frequency_response),),
+                distance=1,
+            )
+            mapped_frequency_response_peaks = mapped_frequency_response[peak_idxs]
+            if freqs_per_v > len(peak_idxs):
+                freqs_per_v = -1
+            freqs_per_vs = np.argpartition(
+                mapped_frequency_response_peaks, int(-freqs_per_v)
+            )[int(-freqs_per_v) :]
+            peak_frequencies.append(
+                [
+                    np.repeat(velocity, len(freqs_per_vs)),
+                    frequency_response[0][peak_idxs][freqs_per_vs],
+                    mapped_frequency_response_peaks[freqs_per_vs],
+                ]
+            )
+
             power = calculate_total_power(measurement_data)
             powers[vel_idx, 1:4] = power
             powers[vel_idx, 0] = velocity
@@ -389,9 +409,9 @@ class LinearMovementVibrationsTest:
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
         combined_array = np.array(
-            [frequency_response[1], frequency_response[2], frequency_response[3]]
+            [frequency_response[1]** 2, frequency_response[2]** 2, frequency_response[3]** 2]
         )
-        mapped_frequency_response = combined_array.sum(axis=0)
+        mapped_frequency_response = np.sqrt(combined_array.sum(axis=0))
         return mapped_frequency_response
 
     @staticmethod
@@ -463,7 +483,7 @@ class LinearMovementVibrationsTest:
     def _get_axis(gcmd):
         axis = gcmd.get("AXIS", None)
         axis = (axis, "x")[axis is None]
-        if axis.lower() not in "xyab":
+        if axis.lower() not in ["x", "y", "a", "b"]:
             raise gcmd.error(f"Unsupported axis'{axis}'")
         return axis
 
