@@ -185,6 +185,9 @@ class LinearMovementVibrationsTest:
         f_max = gcmd.get_int("FMAX", 2 * v_max)
         velocity_range = range(v_min, v_max + 1, v_step)
         powers = np.zeros((len(velocity_range), 4))
+        freqs_per_v = gcmd.get_int("FREQS_PER_V", 3)
+        if freqs_per_v == 0:
+            freqs_per_v = 1
         peak_frequencies = []
         frequency_responses = []
         limits = self._get_limits_from_gcode(gcmd, self.limits)
