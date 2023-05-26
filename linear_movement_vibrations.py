@@ -29,7 +29,8 @@ def calculate_total_power(data):
     """
 
     norm = len(data)
-    pd = (data**2).sum(axis=0) / norm
+    mean = np.mean(data, axis=0)
+    pd = ((data-mean)**2).sum(axis=0) / norm
     return pd
 
 
@@ -333,7 +334,7 @@ class LinearMovementVibrationsTest:
                 raise self.gcode.error("No data received from accelerometer")
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
-
+                accel_chip_client.finish_measurements()
         measurement_data_stripped = self._strip_to_linear_velocity_share(
             velocity, measurement_data, motion_report, self.gcode
         )
