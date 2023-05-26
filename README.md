@@ -67,7 +67,7 @@ To update the package via Moonraker or a web frontend, add this to your `moonrak
 [update_manager LinearMovevementAnalysis]
 type: git_repo
 path: ~/klipper_linear_movement_analysis
-primary_branch: development
+primary_branch: main
 origin: https://github.com/worksasintended/klipper_linear_movement_analysis.git
 install_script: install.sh
 env: ~/klippy-env/bin/python

@@ -8,7 +8,7 @@ declare -a SCRIPTS=("linear_movement_vibrations.py" "linear_movement_plot_lib_st
 GIT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo -e "Installation Script for Klipper Linear Movement Analysis by MarschallMarc#6420"
-echo -e "Linking extension file"
+echo -e "Linking extension files"
 
 for i in "${SCRIPTS[@]}"
 do
