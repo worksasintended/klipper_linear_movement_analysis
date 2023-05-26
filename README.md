@@ -94,7 +94,7 @@ output_directory: /home/pi/printer_data/config/linear_vibrations/
 ```
 Make sure the defined output directory is writable. The one in the example configuration shown above will create a folder `linear_vibrations` that can be accessed via the file browser in the web frontend, assuming you are using RatOS. Similar to the `input_shaper folder`, you can find it in the machine tab in the `config` root.  If you are not using RatOS and are unsure which directory to use `/tmp/` is a save bet. Be aware, that the pngs will not be automatically removed.
 `x_min, x_max,y_min, y_max`define a triangle in which the measurements will be performed. 
-z
+
 If you are using multiple accelerometers, you can also define them as such (untested feature)
 ```
 accel_chip_x: adxl345 rpi
