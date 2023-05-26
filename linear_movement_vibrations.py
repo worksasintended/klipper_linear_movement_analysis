@@ -18,6 +18,7 @@ from . import linear_movement_plot_lib_stat as plotlib
 
 def calculate_total_power(data):
     """Calculate the mean square of 3d acceleration data for each vibration component.
+        The acceleration data is corrected by subtracting the mean (assuming mean = earth accel)
 
     Parameters
     ----------
@@ -29,7 +30,7 @@ def calculate_total_power(data):
     """
 
     norm = len(data)
-    mean = np.mean(data, axis=0)
+    mean = np.mean(data, axis=0) 
     pd = ((data-mean)**2).sum(axis=0) / norm
     return pd
 
