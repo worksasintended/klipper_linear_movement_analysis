@@ -86,7 +86,15 @@ def plot_relative_power(data, outfile, axis, gcmd):
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     plt.xlabel("velocity in mm/s")
     plt.ylabel("relative power")
-    plt.plot(data[:, 0], data[:, 1], marker="o", label="measurement data")
+    plt.plot(data[:,0], data[:,1:], marker="o", label=["x component","y component", "z component"])
+    plt.plot(data[:,0], np.sum(data[:,1:], axis=1), marker="o", label="total")
+    plt.legend(
+        loc="best",
+        fancybox=True,
+        shadow=False,
+        ncol=1,
+        title='measurement data'
+    )
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")
@@ -172,7 +180,6 @@ def plot_frequency_responses_over_velocity(data, outfile, axis, gcmd):
     fig.suptitle(f"Vibration peak frequencies for axis {axis}")
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
-
     for velocity_sample in data:
         x = velocity_sample[1]
         y = velocity_sample[2]

@@ -32,7 +32,7 @@ Please be aware, that those frequencies are usually pretty low. To get useful re
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of velocity changes>] `**
 
-This goes through a range of velocities, plots the frequency responses, and calculates the power of the vibrations as well as the frequencies of the main peaks for each tested velocity, creating plots as follows:
+For a range of velocities, measures the relative power of the vibrations for the acceleration components (x,y,z and sum), the frequencies of the main peaks for each tested velocity, and the full frequency responses. This creates the following plots:
 
 ![frequency_responses_v-range2022-11-06T17_08_02 433594](https://user-images.githubusercontent.com/20718963/200202266-a883232b-1224-411b-a94e-f77ac19949a1.png)
 ![peak_frequencies_logscale2022-11-06T17_07_59 372651](https://user-images.githubusercontent.com/20718963/200202268-af71abc2-f7da-4b48-abc4-52446ad53799.png)

@@ -15,8 +15,10 @@ from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
 
 
+
 def calculate_total_power(data):
-    """Calculate the mean square of 3d acceleration data summing up all three components.
+    """Calculate the mean square of 3d acceleration data for each vibration component.
+        The acceleration data is corrected by subtracting the mean (assuming mean = earth accel)
 
     Parameters
     ----------
@@ -24,12 +26,12 @@ def calculate_total_power(data):
 
     Returns
     -------
-    pd : float
+    pd : positive float
     """
-    pd = 0
+
     norm = len(data)
-    for t, x, y, z in data:
-        pd += (x**2 + y**2 + z**2) / norm
+    mean = np.mean(data, axis=0) 
+    pd = ((data-mean)**2).sum(axis=0) / norm
     return pd
 
 
@@ -183,15 +185,16 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
+        velocity_range = range(v_min, v_max + 1, v_step)
+        powers = np.zeros((len(velocity_range), 4))
         freqs_per_v = gcmd.get_int("FREQS_PER_V", 3)
         if freqs_per_v == 0:
             freqs_per_v = 1
-        powers = []
         peak_frequencies = []
         frequency_responses = []
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
-        for velocity in range(v_min, v_max + 1, v_step):
+        for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
@@ -228,7 +231,8 @@ class LinearMovementVibrationsTest:
             )
 
             power = calculate_total_power(measurement_data)
-            powers.append([velocity, power])
+            powers[vel_idx, 1:4] = power[1:4]
+            powers[vel_idx, 0] = velocity
             start_pos_last = start_pos
             start_pos = end_pos
             end_pos = start_pos_last
@@ -331,7 +335,7 @@ class LinearMovementVibrationsTest:
                 raise self.gcode.error("No data received from accelerometer")
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
-
+                accel_chip_client.finish_measurements()
         measurement_data_stripped = self._strip_to_linear_velocity_share(
             velocity, measurement_data, motion_report, self.gcode
         )
