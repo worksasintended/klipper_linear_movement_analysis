@@ -180,13 +180,10 @@ def plot_frequency_responses_over_velocity(data, outfile, axis, gcmd):
     fig.suptitle(f"Vibration peak frequencies for axis {axis}")
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
-    ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
-
     for velocity_sample in data:
         x = velocity_sample[1]
         y = velocity_sample[2]
         z = velocity_sample[0]
-        ax.plot(x, y, zs=z, zdir="y")
         ax.plot(x, y, zs=z, zdir="y")
     ax.set_xlabel("f in Hz")
     ax.set_zlabel("relative response")
