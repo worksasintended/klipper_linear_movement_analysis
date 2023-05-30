@@ -197,7 +197,7 @@ class LinearMovementVibrationsTest:
         for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
             # collect data and add them to the sets
-            measurement_data = self._measure_linear_movement_vibrations(
+            measurement_data = self._measure_linear_movement_vibrations(gcmd,
                 velocity, start_pos, end_pos, motion_report
             )
             frequency_response = np.array(
@@ -279,7 +279,7 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(
-            velocity, start_pos, end_pos, motion_report
+            gcmd, velocity, start_pos, end_pos, motion_report
         )
         f_max = gcmd.get_int("FMAX", 2 * velocity)
         frequency_response = calculate_frequencies(
@@ -312,9 +312,13 @@ class LinearMovementVibrationsTest:
         )
 
     def _measure_linear_movement_vibrations(
-        self, velocity, start_pos, end_pos, motion_report
+        self, gcmd, velocity, start_pos, end_pos, motion_report
     ):
-        accel = self.toolhead.max_accel
+        # define max_accel from toolhead and check if user settings exceed max accel
+        max_accel = self.toolhead.max_accel
+        accel = gcmd.get_int("ACCEL", max_accel)
+        if accel > max_accel:
+            accel = max_accel
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={accel} ACCEL_TO_DECEL={accel}"
         )
