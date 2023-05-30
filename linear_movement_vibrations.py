@@ -318,7 +318,8 @@ class LinearMovementVibrationsTest:
         max_accel = self.toolhead.max_accel
         accel = gcmd.get_int("ACCEL", max_accel)
         if accel > max_accel:
-            accel = max_accel
+            gcmd.respond_info(f"Cannot exceed machine limits. Acceleration set to {max_accel} mm/s^2")
+
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={accel} ACCEL_TO_DECEL={accel}"
         )
