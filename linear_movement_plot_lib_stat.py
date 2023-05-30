@@ -24,7 +24,8 @@ def plot_frequencies(
     plt.ioff()
     fig = plt.figure()
     fig.suptitle(
-        f"Vibrations while {velocity} mm/s linear movement on {axis} axis with {accel} mm/s^2"
+        f"Vibrations while {velocity} mm/s linear movement on {axis} axis with {accel} mm/s^2",
+        wrap=True
     )
     ax = plt.subplot(111)
     box = ax.get_position()
@@ -85,7 +86,7 @@ def plot_frequencies(
 def plot_relative_power(data, outfile, axis, accel, gcmd):
     data = np.array(data)
     plt.ioff()
-    plt.title(f"Vibration power for axis {axis} with accel {accel} mm/s^2")
+    plt.title(f"Vibration power for axis {axis} with accel {accel} mm/s^2", wrap=True)
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     plt.xlabel("velocity in mm/s")
     plt.ylabel("relative power")
@@ -131,7 +132,8 @@ def plot_peak_frequencies(
     )
 
     fig.suptitle(
-        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2"
+        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2",
+        wrap=True
     )
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
@@ -173,7 +175,8 @@ def plot_peak_frequencies(
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
     fig.suptitle(
-        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2, f_max = {f_max}Hz  "
+        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2, f_max = {f_max} Hz",
+        wrap=True
     )
     plt.savefig(outfilelog)
     gcmd.respond_info(f"output written to {outfilelog}")
