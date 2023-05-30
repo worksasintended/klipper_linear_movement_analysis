@@ -14,7 +14,7 @@ This will measure the vibrations frequency spectrum and create a file in the dir
 
 Full set of options:
 
-`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 2xVELOCITY>]  [D_IDLER=<diameter of idler>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]` 
+`MEASURE_LINEAR_VIBRATIONS [VELOCITY=<velocity>] [AXIS=<x|y|a|b>] [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency considered default 2xVELOCITY>]  [D_IDLER=<diameter of idler>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>] [ACCEL=<set acceleration default max_accel>]` 
 
 
 The settings `XMIN, XMAX, YMINN, YMAX` overwrite the measurement rectangle defined in the config. 
@@ -28,6 +28,7 @@ Please be aware, that those frequencies are usually pretty low. To get useful re
 
 `EXPORT_FFTDATA=1` enables fft data file exportation. In this case, a .npz file in output_directory/raw_data is returned, which can be locally imported after downloading by using e.g. data = numpy.load('fname.npz', allow_pickle=True)['data'].  data array has the form [[velocity, frequencies, fft_data] for velocity in velocities].
 
+`ACCEL` defines the acceleration and deacceleration in mm/s^2 for the trapezoid velocity profile. 
 ### `MEASURE_LINEAR_VIBRATIONS_RANGE`
 
 **A minimal, and in most cases sufficient approach is to use `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of velocity changes>] `**
@@ -42,7 +43,7 @@ For a range of velocities, measures the relative power of the vibrations for the
 
 Full set of options:
 
-`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>] [FREQS_PER_V=<number of freqs per velocity> default is 3]` 
+`MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>] [VMAX=<maximal velocity>] [STEP=<steps size of veloctity changes>] [D_IDLER=<diameter of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>] [FREQS_PER_V=<number of freqs per velocity> default is 3] [ACCEL=<set acceleration default max_accel>]` 
 
 
 `FREQS_PER_V` specifies the number (default 3) of displayed vibration frequencies in the peak_frequencies and peak_frequencies_logscale plots that dominate the fft response per velocity. `FREQS_PER_V=-1` plots all frequency response peaks (only recommended for more than 100 velocity points).

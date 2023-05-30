@@ -12,6 +12,7 @@ import numpy as np
 def plot_frequencies(
     data,
     outfile,
+    accel,
     velocity,
     axis,
     gcmd,
@@ -22,7 +23,9 @@ def plot_frequencies(
 ):
     plt.ioff()
     fig = plt.figure()
-    fig.suptitle(f"Vibrations while {velocity}mm/s linear movement on {axis} axis")
+    fig.suptitle(
+        f"Vibrations while {velocity} mm/s linear movement on {axis} axis with {accel} mm/s^2"
+    )
     ax = plt.subplot(111)
     box = ax.get_position()
     # shrink and move up to allow legend beneeth
@@ -79,21 +82,22 @@ def plot_frequencies(
     plt.close("all")
 
 
-def plot_relative_power(data, outfile, axis, gcmd):
+def plot_relative_power(data, outfile, axis, accel, gcmd):
     data = np.array(data)
     plt.ioff()
-    plt.title(f"Vibration power for axis {axis}")
+    plt.title(f"Vibration power for axis {axis} with accel {accel} mm/s^2")
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     plt.xlabel("velocity in mm/s")
     plt.ylabel("relative power")
-    plt.plot(data[:,0], data[:,1:], marker="o", label=["x component","y component", "z component"])
-    plt.plot(data[:,0], np.sum(data[:,1:], axis=1), marker="o", label="total")
+    plt.plot(
+        data[:, 0],
+        data[:, 1:],
+        marker="o",
+        label=["x component", "y component", "z component"],
+    )
+    plt.plot(data[:, 0], np.sum(data[:, 1:], axis=1), marker="o", label="total")
     plt.legend(
-        loc="best",
-        fancybox=True,
-        shadow=False,
-        ncol=1,
-        title='measurement data'
+        loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data"
     )
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
@@ -105,6 +109,7 @@ def plot_peak_frequencies(
     outfile,
     outfilelog,
     axis,
+    accel,
     gcmd,
     d=None,
     step_distance=None,
@@ -125,7 +130,9 @@ def plot_peak_frequencies(
         velocities, peak_freqs, c="black", s=peak_height_to_size, marker="o"
     )
 
-    fig.suptitle(f"Vibration peak frequencies for axis {axis}")
+    fig.suptitle(
+        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2"
+    )
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax.set_xlabel("velocity in mm/s")
@@ -165,19 +172,23 @@ def plot_peak_frequencies(
     )
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
-    fig.suptitle(f"Vibration peak frequencies for axis {axis}, f_max = {f_max}Hz  ")
+    fig.suptitle(
+        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2, f_max = {f_max}Hz  "
+    )
     plt.savefig(outfilelog)
     gcmd.respond_info(f"output written to {outfilelog}")
     plt.close("all")
 
 
-def plot_frequency_responses_over_velocity(data, outfile, axis, gcmd):
+def plot_frequency_responses_over_velocity(data, outfile, axis, accel, gcmd):
     data = np.array(data)
     plt.ioff()
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
 
-    fig.suptitle(f"Vibration peak frequencies for axis {axis}")
+    fig.suptitle(
+        f"Vibration peak frequencies for axis {axis} with accel {accel} mm/s^2"
+    )
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
     for velocity_sample in data:

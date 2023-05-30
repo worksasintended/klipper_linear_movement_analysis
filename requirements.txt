@@ -1,4 +1,4 @@
 # This file describes the Python package requirements for
 # the linear movement analysis extention. 
 matplotlib
-scipyhttps://github.com/worksasintended/klipper_linear_movement_analysis/pulls
+scipy
