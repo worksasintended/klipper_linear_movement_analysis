@@ -15,7 +15,6 @@ from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
 
 
-
 def calculate_total_power(data):
     """Calculate the mean square of 3d acceleration data for each vibration component.
         The acceleration data is corrected by subtracting the mean (assuming mean = earth accel)
@@ -30,8 +29,8 @@ def calculate_total_power(data):
     """
 
     norm = len(data)
-    mean = np.mean(data, axis=0) 
-    pd = ((data-mean)**2).sum(axis=0) / norm
+    mean = np.mean(data, axis=0)
+    pd = ((data - mean) ** 2).sum(axis=0) / norm
     return pd
 
 
@@ -59,7 +58,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis])) 
+        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
@@ -137,7 +136,8 @@ class LinearMovementVibrationsTest:
         [FMAX=<maximum frequency considered default 120>] [FMIN=<minimum frequency
         considered default 2xVELOCITY>]  [D_IDLER=<diameter of idler>] [XMIN=<VALUE>]
         [XMAX=<VALUE>] [YMIN=<VALUE>] [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>]
-        [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]`
+        [ENDX=<VALUE>] [ENDY=<VALUE>] [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]
+        [ACCEL=<set acceleration default max_accel>]`
 
 
     - `MEASURE_LINEAR_VIBRATIONS_RANGE [AXIS=<x|y|a|b>] [VMIN=<minimal velocity>]
@@ -145,8 +145,9 @@ class LinearMovementVibrationsTest:
         of pulley or idler>] [FMIN=<minimum frequency considered default 5>] [FMAX=<maximum
         frequency considered default two times VMAX>] [XMIN=<VALUE>] [XMAX=<VALUE>] [YMIN=<VALUE>]
         [YMAX=<VALUE>] [STARTX=<VALUE>] [STARTY=<VALUE>] [ENDX=<VALUE>] [ENDY=<VALUE>]
-        [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]`
-
+        [EXPORT_FFTDATA=<1|0 (enabled|disabled) default is 0>]
+        [FREQS_PER_V=<number of freqs per velocity> default is 3]
+        [ACCEL=<set acceleration default max_accel>]`
     """
 
     def __init__(self, config):
@@ -184,6 +185,7 @@ class LinearMovementVibrationsTest:
         axis = self._get_axis(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
+        accel = self._get_accel(gcmd)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
         velocity_range = range(v_min, v_max + 1, v_step)
         powers = np.zeros((len(velocity_range), 4))
@@ -198,7 +200,7 @@ class LinearMovementVibrationsTest:
             gcmd.respond_info(f"measuring {velocity} mm/s")
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
-                velocity, start_pos, end_pos, motion_report
+                gcmd, accel, velocity, start_pos, end_pos, motion_report
             )
             frequency_response = np.array(
                 calculate_frequencies(measurement_data, f_max, gcmd.get_int("FMIN", 5))
@@ -246,7 +248,7 @@ class LinearMovementVibrationsTest:
             )
 
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotlib.plot_relative_power(powers, outfile, axis, gcmd)
+        plotlib.plot_relative_power(powers, outfile, axis, accel, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
@@ -259,6 +261,7 @@ class LinearMovementVibrationsTest:
             outfile,
             outfilelog,
             axis,
+            accel,
             gcmd,
             d=gcmd.get_float("D_IDLER", None),
             step_distance=step_distance,
@@ -269,17 +272,18 @@ class LinearMovementVibrationsTest:
             self.out_directory, "frequency_responses_v-range"
         )
         plotlib.plot_frequency_responses_over_velocity(
-            frequency_responses, outfile, axis, gcmd
+            frequency_responses, outfile, axis, accel, gcmd
         )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         axis = self._get_axis(gcmd)
         velocity = self._get_velocity(gcmd)
+        accel = self._get_accel(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         measurement_data = self._measure_linear_movement_vibrations(
-            velocity, start_pos, end_pos, motion_report
+            gcmd, accel, velocity, start_pos, end_pos, motion_report
         )
         f_max = gcmd.get_int("FMAX", 2 * velocity)
         frequency_response = calculate_frequencies(
@@ -302,6 +306,7 @@ class LinearMovementVibrationsTest:
         plotlib.plot_frequencies(
             frequency_response,
             outfile,
+            accel,
             velocity,
             axis,
             gcmd,
@@ -312,9 +317,8 @@ class LinearMovementVibrationsTest:
         )
 
     def _measure_linear_movement_vibrations(
-        self, velocity, start_pos, end_pos, motion_report
+        self, gcmd, accel, velocity, start_pos, end_pos, motion_report
     ):
-        accel = self.toolhead.max_accel
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={accel} ACCEL_TO_DECEL={accel}"
         )
@@ -348,6 +352,17 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
+
+    def _get_accel(self, gcmd):
+        # define max_accel from toolhead and check if user settings exceed max accel
+        max_accel = self.toolhead.max_accel
+        accel = gcmd.get_int("ACCEL", max_accel)
+        if accel > max_accel:
+            accel = max_accel
+            gcmd.respond_info(
+                f"Warning: Cannot exceed machine limits. Acceleration set to {max_accel} mm/s^2"
+            )
+        return accel
 
     @staticmethod
     def _write_data_outfile(directory, gcmd, fname, data):
@@ -414,7 +429,11 @@ class LinearMovementVibrationsTest:
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
         combined_array = np.array(
-            [frequency_response[1]** 2, frequency_response[2]** 2, frequency_response[3]** 2]
+            [
+                frequency_response[1] ** 2,
+                frequency_response[2] ** 2,
+                frequency_response[3] ** 2,
+            ]
         )
         mapped_frequency_response = np.sqrt(combined_array.sum(axis=0))
         return mapped_frequency_response
