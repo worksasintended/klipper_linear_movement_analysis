@@ -235,6 +235,8 @@ class LinearMovementVibrationsTest:
         for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
             # collect data and add them to the sets
+            gcmd.respond_info(f"{config}, {motion_report}")
+
             measurement_data = self._measure_linear_movement_vibrations(
                 gcmd, config, motion_report
             )
