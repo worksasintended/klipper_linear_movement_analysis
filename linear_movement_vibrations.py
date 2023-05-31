@@ -285,7 +285,7 @@ class LinearMovementVibrationsTest:
             )
 
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotlib.plot_relative_power(powers, outfile, config.axis, config.accel, gcmd)
+        plotlib.plot_relative_power(powers, outfile, config, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
@@ -297,13 +297,11 @@ class LinearMovementVibrationsTest:
             peak_frequencies,
             outfile,
             outfilelog,
-            config.axis,
-            config.accel,
+            config,
             gcmd,
             d=gcmd.get_float("D_IDLER", None),
             step_distance=step_distance,
             rotation_distance=rotation_dist,
-            f_max=config.f_max,
         )
         outfile = self._get_outfile_name(
             self.out_directory, "frequency_responses_v-range"
@@ -341,14 +339,11 @@ class LinearMovementVibrationsTest:
         plotlib.plot_frequencies(
             frequency_response,
             outfile,
-            config.accel,
-            config.velocity,
-            config.axis,
+            config,
             gcmd,
             d=gcmd.get_float("D_IDLER", None),
             step_distance=step_distance,
             rotation_distance=rotation_dist,
-            f_max=config.f_max,
         )
 
     def _measure_linear_movement_vibrations(self, config, motion_report):
@@ -394,14 +389,11 @@ class LinearMovementVibrationsTest:
         # define max_accel from toolhead and check if user settings exceed max accel
         max_accel = self.toolhead.max_accel
         accel = gcmd.get_int("ACCEL", max_accel)
-        """
-        
         if accel > max_accel:
             accel = max_accel
             gcmd.respond_info(
                 f"Warning: Cannot exceed machine limits. Acceleration set to {max_accel} mm/s^2"
-            )"""
-        
+            )
         return accel
 
     @staticmethod
