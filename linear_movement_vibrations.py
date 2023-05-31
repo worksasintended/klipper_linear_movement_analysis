@@ -307,7 +307,7 @@ class LinearMovementVibrationsTest:
             self.out_directory, "frequency_responses_v-range"
         )
         plotlib.plot_frequency_responses_over_velocity(
-            frequency_responses, outfile, config.axis, config.accel, gcmd
+            frequency_responses, outfile, config, gcmd
         )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
