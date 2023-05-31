@@ -392,15 +392,17 @@ class LinearMovementVibrationsTest:
 
     def _get_accel(self, gcmd):
         # define max_accel from toolhead and check if user settings exceed max accel
-        """max_accel = self.toolhead.max_accel
+        max_accel = self.toolhead.max_accel
         accel = gcmd.get_int("ACCEL", max_accel)
+        """
+        
         if accel > max_accel:
             accel = max_accel
             gcmd.respond_info(
                 f"Warning: Cannot exceed machine limits. Acceleration set to {max_accel} mm/s^2"
             )"""
-        pass
-        #return accel
+        
+        return accel
 
     @staticmethod
     def _get_freqs_per_v(gcmd):
