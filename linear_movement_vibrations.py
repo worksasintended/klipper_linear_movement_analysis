@@ -234,6 +234,7 @@ class LinearMovementVibrationsTest:
 
         for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
+            config.velocity = velocity
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
                 config, motion_report
@@ -316,7 +317,7 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         config.f_max = gcmd.get_int("FMAX", 2 * config.velocity)
         measurement_data = self._measure_linear_movement_vibrations(
-            gcmd, config, motion_report
+            config, motion_report
         )
 
         frequency_response = calculate_frequencies(
