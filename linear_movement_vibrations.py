@@ -188,6 +188,7 @@ class LinearMovementVibrationsTest:
         v_min: float
         v_max: float
         v_step: float
+        velocity: float
         accel: float
         f_max: float
         f_min: float
