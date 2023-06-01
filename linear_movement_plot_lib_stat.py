@@ -80,6 +80,8 @@ def plot_frequencies(
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
     ax.plot(data[0], data[3], label="z")
+    ax.grid()
+    ax.minorticks_on()
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
@@ -119,9 +121,17 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
         label=["x component", "y component", "z component"],
         markersize=5,
     )
+    # heuristics for visibility
+    markersize = 5 if len(data) < 200 else 2
     ax.plot(
-        data[:, 0], np.sum(data[:, 1:], axis=1), marker="o", label="total", markersize=5
+        data[:, 0],
+        np.sum(data[:, 1:], axis=1),
+        marker="o",
+        label="total",
+        markersize=markersize,
     )
+    ax.grid()
+    ax.minorticks_on()
     ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data")
     fig.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
@@ -144,10 +154,10 @@ def plot_peak_frequencies(
     velocities = np.concatenate(velocities)
     peak_ffts = np.concatenate(peak_ffts)
     peak_freqs = np.concatenate(peak_freqs)
-    #peak_ffts = peak_ffts ** (0.8) try out without rescaling 
+    # peak_ffts = peak_ffts ** (0.8) try out without rescaling
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-    peak_height_to_size = 90 * normalized_peak_heights
+    peak_height_to_size = 110 * normalized_peak_heights
     scatter = ax.scatter(
         velocities, peak_freqs, c="black", s=peak_height_to_size, marker="o"
     )
