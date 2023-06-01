@@ -376,6 +376,7 @@ class LinearMovementVibrationsTest:
                 self._exit_gcommand(GcommandExitType("error"), "No data received from accelerometer")
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
+
         measurement_data_stripped = self._strip_to_linear_velocity_share(
             measurement_parameters.velocity, measurement_data, motion_report, self.gcode
         )
@@ -392,7 +393,7 @@ class LinearMovementVibrationsTest:
 
     def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
         self.toolhead.max_accel = self.max_accel
-        for accel_chip in self.accel_chips:
+        for adxl_axis_attached, accel_chip in self.accel_chips:
             accel_chip.finish_measurements()
 
         if state.value == "error":
