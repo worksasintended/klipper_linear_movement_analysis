@@ -196,6 +196,8 @@ class LinearMovementVibrationsTest:
                 self.accel_chip_names = [("xy", self.accel_chip_names[0][1])]
 
         self.out_directory = config.get("output_directory")
+        if not os.path.exists(self.out_directory):
+            os.makedirs(self.out_directory)
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
 
@@ -261,13 +263,7 @@ class LinearMovementVibrationsTest:
             measurement_parameters.start_pos = measurement_parameters.end_pos
             measurement_parameters.end_pos = start_pos_last
 
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
-        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
-            outfile = self._get_outfile_name("", "frequency_responses", "")
-            self._write_data_outfile(
-                self.out_directory, gcmd, outfile, frequency_responses
-            )
+        self._export_fft_data(frequency_responses, gcmd, self.out_directory, "frequency_responses")
 
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
@@ -298,9 +294,6 @@ class LinearMovementVibrationsTest:
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
-        measurement_parameters.f_max = gcmd.get_int(
-            "FMAX", 2 * measurement_parameters.velocity
-        )
         gcmd.respond_info(f"measuring {measurement_parameters.velocity} mm/s")
 
         measurement_data = self._measure_linear_movement_vibrations(
@@ -311,13 +304,8 @@ class LinearMovementVibrationsTest:
             measurement_data, measurement_parameters.f_max, measurement_parameters.f_min
         )
 
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
-        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
-            outfile = self._get_outfile_name("", "frequency_response", "")
-            self._write_data_outfile(
-                self.out_directory, gcmd, outfile, frequency_response
-            )
+        self._export_fft_data(frequency_response, gcmd, self.out_directory, "frequency_response")
+
         outfile = self._get_outfile_name(
             self.out_directory,
             (
@@ -326,6 +314,7 @@ class LinearMovementVibrationsTest:
                     + "mmps_"
             ),
         )
+
         rotation_dist, step_distance = self._get_step_distance(
             measurement_parameters.axis, self.stepper_configs
         )
@@ -338,6 +327,8 @@ class LinearMovementVibrationsTest:
             step_distance=step_distance,
             rotation_distance=rotation_dist,
         )
+
+
 
     def _measure_linear_movement_vibrations(
             self, measurement_parameters, motion_report
@@ -392,6 +383,12 @@ class LinearMovementVibrationsTest:
             for chip_axis, chip_name in self.accel_chip_names
         ]
 
+    def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
+        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
+            outfile = self._get_outfile_name("", fname, "")
+            self._write_data_outfile(
+                out_directory, gcmd, outfile, frequency_response
+            )
     def _get_accel(self, gcmd):
         # define max_accel from toolhead and check if user settings exceed max accel
         max_accel = self.toolhead.max_accel
