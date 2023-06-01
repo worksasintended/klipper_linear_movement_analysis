@@ -181,7 +181,6 @@ class LinearMovementVibrationsTest:
         self.out_directory = config.get("output_directory")
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
-        self.test_max_accel = config.getfloat('max_accel', above=0.)
 
     @dataclass()
     class configuration:
@@ -208,7 +207,6 @@ class LinearMovementVibrationsTest:
         limits = self._get_limits_from_gcode(gcmd, self.limits)
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         freqs_per_v = self._get_freqs_per_v(gcmd)
-        gcmd.respond_info(f"config max_accel {self.test_max_accel}")
 
 
         return self.configuration(
