@@ -12,7 +12,7 @@ import datetime
 import os
 import numpy as np
 from scipy import signal
-from . import linear_movement_plot_lib_stat as plotlib
+import linear_movement_plot_lib_stat as plotlib
 from dataclasses import dataclass
 
 
@@ -152,21 +152,23 @@ class LinearMovementVibrationsTest:
     """
 
     @dataclass()
-    class measurement_parameters:
+    class MeasurementParameters:
         axis: str
-        v_min: float
-        v_max: float
-        v_step: float
+        v_min: int
+        v_max: int
+        v_step: int
         velocity: float
         accel: float
         f_max: float
         f_min: float
-        start_pos: float
-        end_pos: float
+        start_pos: list
+        end_pos: list
         limits: tuple
         freqs_per_v: int
 
     def __init__(self, config):
+        self.toolhead = None
+        self.accel_chips = None
         self.printer = config.get_printer()
         self.printer.register_event_handler("klippy:connect", self.connect)
         self.gcode = self.printer.lookup_object("gcode")
@@ -243,7 +245,7 @@ class LinearMovementVibrationsTest:
             freqs_per_vs = np.argpartition(
                 mapped_frequency_response_peaks,
                 int(-measurement_parameters.freqs_per_v),
-            )[int(-measurement_parameters.freqs_per_v) :]
+            )[int(-measurement_parameters.freqs_per_v):]
             peak_frequencies.append(
                 [
                     np.repeat(velocity, len(freqs_per_vs)),
@@ -294,7 +296,7 @@ class LinearMovementVibrationsTest:
         )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
-        measurement_parameters = self._get_measure_config(gcmd)
+        measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         measurement_parameters.f_max = gcmd.get_int(
             "FMAX", 2 * measurement_parameters.velocity
@@ -319,9 +321,9 @@ class LinearMovementVibrationsTest:
         outfile = self._get_outfile_name(
             self.out_directory,
             (
-                "linear_movement_response_"
-                + str(measurement_parameters.velocity)
-                + "mmps_"
+                    "linear_movement_response_"
+                    + str(measurement_parameters.velocity)
+                    + "mmps_"
             ),
         )
         rotation_dist, step_distance = self._get_step_distance(
@@ -338,7 +340,7 @@ class LinearMovementVibrationsTest:
         )
 
     def _measure_linear_movement_vibrations(
-        self, measurement_parameters, motion_report
+            self, measurement_parameters, motion_report
     ):
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={measurement_parameters.accel} ACCEL_TO_DECEL={measurement_parameters.accel}"
@@ -412,7 +414,7 @@ class LinearMovementVibrationsTest:
         start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
         freqs_per_v = self._get_freqs_per_v(gcmd)
 
-        return self.measurement_parameters(
+        return self.MeasurementParameters(
             axis,
             v_min,
             v_max,
@@ -433,16 +435,6 @@ class LinearMovementVibrationsTest:
         if freqs_per_v == 0:
             freqs_per_v = 1
         return freqs_per_v
-
-    @staticmethod
-    def _write_data_outfile(directory, gcmd, fname, data):
-        """Write data into out_directory/raw_data/fname by np.savez."""
-
-        if not os.path.exists(directory + "raw_data"):
-            os.makedirs(directory + "raw_data")
-        outfile = directory + "raw_data/" + fname
-        np.savez(outfile, data=np.array(data, dtype=object))
-        gcmd.respond_info(f"data output written to {outfile}")
 
     @staticmethod
     def _write_data_outfile(directory, gcmd, fname, data):
@@ -476,16 +468,16 @@ class LinearMovementVibrationsTest:
         velocity_not_reached = True
         for i in range(len(data)):
             if (
-                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                == velocity
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    == velocity
             ):
                 data = data[i:]
                 velocity_not_reached = False
                 break
         for i in range(len(data)):
             if (
-                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                < velocity
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    < velocity
             ):
                 data = data[: i - 1]
                 break
