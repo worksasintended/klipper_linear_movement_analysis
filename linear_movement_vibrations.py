@@ -10,6 +10,7 @@
 
 import datetime
 import os
+import enum
 import numpy as np
 from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
@@ -126,6 +127,11 @@ def parse_gear_ratio(config, note_valid):
     return result
 
 
+class GcommandExitType(enum.Enum):
+    error = "error"
+    success = "success"
+
+
 class LinearMovementVibrationsTest:
     """This is a klipper extension allowing to measure vibrations on linear movements
     on different axis. Unlike previous solutions, the acceleration phases in the moves
@@ -169,6 +175,7 @@ class LinearMovementVibrationsTest:
     def __init__(self, config):
         self.toolhead = None
         self.accel_chips = None
+        self.max_accel = None
         self.printer = config.get_printer()
         self.printer.register_event_handler("klippy:connect", self.connect)
         self.gcode = self.printer.lookup_object("gcode")
@@ -200,7 +207,6 @@ class LinearMovementVibrationsTest:
             os.makedirs(self.out_directory)
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
-        self.initAccel = config.get("max_accel")
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
@@ -291,13 +297,12 @@ class LinearMovementVibrationsTest:
         plotlib.plot_frequency_responses_over_velocity(
             frequency_responses, outfile, measurement_parameters, gcmd
         )
+        self._exit_gcommand()
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         gcmd.respond_info(f"measuring {measurement_parameters.velocity} mm/s")
-        gcmd.respond_info(f"max accel: {self.initAccel}")
-
         measurement_data = self._measure_linear_movement_vibrations(
             measurement_parameters, motion_report
         )
@@ -329,6 +334,7 @@ class LinearMovementVibrationsTest:
             step_distance=step_distance,
             rotation_distance=rotation_dist,
         )
+        self._exit_gcommand()
 
 
 
@@ -366,12 +372,10 @@ class LinearMovementVibrationsTest:
         measurement_data = []
         # stop measurement
         for adxl_axis_attached, accel_chip_client in measurement_handler:
-            accel_chip_client.finish_measurements()
             if not accel_chip_client.has_valid_samples():
-                raise self.gcode.error("No data received from accelerometer")
+                self._exit_gcommand(GcommandExitType("error"), "No data received from accelerometer")
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
-                accel_chip_client.finish_measurements()
         measurement_data_stripped = self._strip_to_linear_velocity_share(
             measurement_parameters.velocity, measurement_data, motion_report, self.gcode
         )
@@ -384,9 +388,16 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
+        self.max_accel = self.toolhead.max_accel
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
+    def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
+        self.toolhead.max_accel = self.max_accel
+        for accel_chip in self.accel_chips:
+            accel_chip.finish_measurements()
+
+        if state.value == "error":
+            raise self.gcode.error(message)
+
 
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
@@ -394,9 +405,8 @@ class LinearMovementVibrationsTest:
             self._write_data_outfile(
                 out_directory, gcmd, outfile, frequency_response
             )
-    def _get_accel(self, gcmd):
+    def _get_accel(self, gcmd, max_accel):
         # define max_accel from toolhead and check if user settings exceed max accel
-        max_accel = self.toolhead.max_accel
         accel = gcmd.get_int("ACCEL", max_accel)
         if accel > max_accel:
             accel = max_accel
@@ -409,7 +419,7 @@ class LinearMovementVibrationsTest:
         axis = self._get_axis(gcmd)
         v_min, v_max, v_step = self._get_velocity_range(gcmd)
         velocity = self._get_velocity(gcmd)
-        accel = self._get_accel(gcmd)
+        accel = self._get_accel(gcmd, self.max_accel)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
         f_min = gcmd.get_int("FMIN", 5)
         limits = self._get_limits_from_gcode(gcmd, self.limits)
@@ -430,6 +440,30 @@ class LinearMovementVibrationsTest:
             limits,
             freqs_per_v,
         )
+    def _strip_to_linear_velocity_share(self,velocity, data, motion_report, gcmd):
+        # find time stamp of linear movement start
+        velocity_not_reached = True
+        for i in range(len(data)):
+            if (
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    == velocity
+            ):
+                data = data[i:]
+                velocity_not_reached = False
+                break
+        for i in range(len(data)):
+            if (
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    < velocity
+            ):
+                data = data[: i - 1]
+                break
+        if velocity_not_reached or len(data) < 300:
+            message = "Target velocity not reached for a sufficient amount of time. Either decrease target velocity, " \
+                      "increase acceleration or increase test area "
+            self._exit_gcommand(GcommandExitType("error"), message)
+
+        return data
 
     @staticmethod
     def _get_freqs_per_v(gcmd):
@@ -464,31 +498,8 @@ class LinearMovementVibrationsTest:
             rotation_dist, step_distance = parse_full_step_distance(config[1])
         return rotation_dist, step_distance
 
-    @staticmethod
-    def _strip_to_linear_velocity_share(velocity, data, motion_report, gcmd):
-        # find time stamp of linear movement start
-        velocity_not_reached = True
-        for i in range(len(data)):
-            if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    == velocity
-            ):
-                data = data[i:]
-                velocity_not_reached = False
-                break
-        for i in range(len(data)):
-            if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    < velocity
-            ):
-                data = data[: i - 1]
-                break
-        if velocity_not_reached or len(data) < 300:
-            raise gcmd.error(
-                "Target velocity not reached for a sufficient amount of time. Either decrease target "
-                "velocity, increase acceleration or increase test area "
-            )
-        return data
+
+
 
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
@@ -564,15 +575,16 @@ class LinearMovementVibrationsTest:
         velocity = gcmd.get_int("VELOCITY", None)
         velocity = (velocity, 150)[velocity is None]
         if self.toolhead.max_velocity < velocity:
-            raise gcmd.error(f"Requested velocity '{velocity}' succeeds printer limits")
+            message = f"Requested velocity '{velocity}' succeeds printer limits"
+            self._exit_gcommand(GcommandExitType("error"), message)
         return velocity
 
-    @staticmethod
-    def _get_axis(gcmd):
+
+    def _get_axis(self,gcmd):
         axis = gcmd.get("AXIS", None)
         axis = (axis, "x")[axis is None]
         if axis.lower() not in ["x", "y", "a", "b"]:
-            raise gcmd.error(f"Unsupported axis'{axis}'")
+            self._exit_gcommand(GcommandExitType("error"), f"Unsupported axis'{axis}'")
         return axis
 
     @staticmethod
