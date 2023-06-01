@@ -12,7 +12,7 @@ import numpy as np
 def plot_frequencies(
     data,
     outfile,
-    measure_config,
+    parameters,
     gcmd,
     d=None,
     step_distance=None,
@@ -21,7 +21,7 @@ def plot_frequencies(
     plt.ioff()
     fig = plt.figure()
     fig.suptitle(
-        f"Vibrations while {measure_config.velocity} mm/s linear movement on {measure_config.axis} axis with {measure_config.accel} mm/s^2",
+        f"Vibrations while {parameters.velocity} mm/s linear movement on {parameters.axis} axis with {parameters.accel} mm/s^2",
         wrap=True,
     )
     ax = plt.subplot(111)
@@ -31,42 +31,42 @@ def plot_frequencies(
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
-    ax.set_xlim(data[0][0], measure_config.f_max)
+    ax.set_xlim(data[0][0], parameters.f_max)
     ax.axvline(
-        x=measure_config.velocity / 2, label="2gt belt pitch", ls="--", color="tab:brown"
+        x=parameters.velocity / 2, label="2gt belt pitch", ls="--", color="tab:brown"
     )
     ax.axvline(
-        x=measure_config.velocity / 1.21, label="2gt belt teeth width", ls="--", color="black"
+        x=parameters.velocity / 1.21, label="2gt belt teeth width", ls="--", color="black"
     )
     ax.axvline(
-        x=measure_config.velocity / 0.80,
+        x=parameters.velocity / 0.80,
         label="2gt belt valley width",
         ls="--",
         color="tab:cyan",
     )
     ax.axvline(
-        x=measure_config.velocity / 0.40,
+        x=parameters.velocity / 0.40,
         label="2gt belt flat width",
         ls="--",
         color="tab:brown",
     )
     if d is not None:
         ax.axvline(
-            measure_config.velocity / (np.pi * d),
+            parameters.velocity / (np.pi * d),
             label="idler rotation",
             ls="--",
             color="tab:gray",
         )
     if step_distance is not None:
         ax.axvline(
-            measure_config.velocity / rotation_distance,
+            parameters.velocity / rotation_distance,
             label="pulley rotation",
             ls="--",
             color="tab:olive",
         )
     if rotation_distance is not None:
         ax.axvline(
-            measure_config.velocity * step_distance / rotation_distance,
+            parameters.velocity * step_distance / rotation_distance,
             label="motor step",
             ls="--",
             color="tab:pink",
@@ -86,18 +86,18 @@ def plot_frequencies(
     ax2.set_xlim(ax.get_xlim())
     ax2.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax2.tick_params(axis="x", direction="in", pad=-15)
-    ax2.set_xticklabels([f"{measure_config.velocity/x:.2f}" for x in ax.get_xticks()])
+    ax2.set_xticklabels([f"{parameters.velocity/x:.2f}" for x in ax.get_xticks()])
     ax2.set_xlabel("pattern distance in mm")
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")
 
 
-def plot_relative_power(data, outfile, measure_config, gcmd):
+def plot_relative_power(data, outfile, parameters, gcmd):
     data = np.array(data)
     plt.ioff()
     plt.title(
-        f"Vibration power for axis {measure_config.axis} with accel {measure_config.accel} mm/s^2",
+        f"Vibration power for axis {parameters.axis} with accel {parameters.accel} mm/s^2",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -122,7 +122,7 @@ def plot_peak_frequencies(
     data,
     outfile,
     outfilelog,
-    measure_config,
+    parameters,
     gcmd,
     d=None,
     step_distance=None,
@@ -143,14 +143,14 @@ def plot_peak_frequencies(
     )
 
     fig.suptitle(
-        f"Vibration peak frequencies for axis {measure_config.axis} with accel {measure_config.accel} mm/s^2",
+        f"Vibration peak frequencies for axis {parameters.axis} with accel {parameters.accel} mm/s^2",
         wrap=True,
     )
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
-    ax.set_ylim(0, measure_config.f_max)
+    ax.set_ylim(0, parameters.f_max)
     ax.plot(velocities, velocities / 2, label="2gt belt pitch")
     ax.plot(velocities, velocities / 1.21, label="2gt belt teeth width")
     ax.plot(velocities, velocities / 0.8, label="2gt belt valley width")
@@ -175,7 +175,7 @@ def plot_peak_frequencies(
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     ax.set_yscale("log")
-    plt.axhline(y=measure_config.f_max, color="tab:olive", linestyle="--", label="f_max")
+    plt.axhline(y=parameters.f_max, color="tab:olive", linestyle="--", label="f_max")
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
@@ -186,7 +186,7 @@ def plot_peak_frequencies(
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
     fig.suptitle(
-        f"Vibration peak frequencies for axis {measure_config.axis} with accel {measure_config.accel} mm/s^2, f_max = {measure_config.f_max} Hz",
+        f"Vibration peak frequencies for axis {parameters.axis} with accel {parameters.accel} mm/s^2, f_max = {parameters.f_max} Hz",
         wrap=True,
     )
     plt.savefig(outfilelog)
@@ -194,14 +194,14 @@ def plot_peak_frequencies(
     plt.close("all")
 
 
-def plot_frequency_responses_over_velocity(data, outfile, measure_config, gcmd):
+def plot_frequency_responses_over_velocity(data, outfile, parameters, gcmd):
     data = np.array(data)
     plt.ioff()
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
 
     fig.suptitle(
-        f"Vibration peak frequencies for axis {measure_config.axis} with accel {measure_config.accel} mm/s^2"
+        f"Vibration peak frequencies for axis {parameters.axis} with accel {parameters.accel} mm/s^2"
     )
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
