@@ -572,7 +572,7 @@ class LinearMovementVibrationsTest:
 
     @staticmethod
     def _get_outfile_name(directory, fname, extension=".png"):
-        return directory + fname + datetime.datetime.today().isoformat() + extension
+        return directory + fname + "_" + datetime.datetime.today().isoformat() + extension
 
 
 def load_config(config):
