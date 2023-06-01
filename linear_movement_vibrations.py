@@ -247,7 +247,7 @@ class LinearMovementVibrationsTest:
             freqs_per_vs = np.argpartition(
                 mapped_frequency_response_peaks,
                 int(-measurement_parameters.freqs_per_v),
-            )[int(-measurement_parameters.freqs_per_v):]
+            )[int(-measurement_parameters.freqs_per_v) :]
             peak_frequencies.append(
                 [
                     np.repeat(velocity, len(freqs_per_vs)),
@@ -263,7 +263,9 @@ class LinearMovementVibrationsTest:
             measurement_parameters.start_pos = measurement_parameters.end_pos
             measurement_parameters.end_pos = start_pos_last
 
-        self._export_fft_data(frequency_responses, gcmd, self.out_directory, "frequency_responses")
+        self._export_fft_data(
+            frequency_responses, gcmd, self.out_directory, "frequency_responses"
+        )
 
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
@@ -304,14 +306,16 @@ class LinearMovementVibrationsTest:
             measurement_data, measurement_parameters.f_max, measurement_parameters.f_min
         )
 
-        self._export_fft_data(frequency_response, gcmd, self.out_directory, "frequency_response")
+        self._export_fft_data(
+            frequency_response, gcmd, self.out_directory, "frequency_response"
+        )
 
         outfile = self._get_outfile_name(
             self.out_directory,
             (
-                    "linear_movement_response_"
-                    + str(measurement_parameters.velocity)
-                    + "mmps_"
+                "linear_movement_response_"
+                + str(measurement_parameters.velocity)
+                + "mmps_"
             ),
         )
 
@@ -328,10 +332,8 @@ class LinearMovementVibrationsTest:
             rotation_distance=rotation_dist,
         )
 
-
-
     def _measure_linear_movement_vibrations(
-            self, measurement_parameters, motion_report
+        self, measurement_parameters, motion_report
     ):
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={measurement_parameters.accel} ACCEL_TO_DECEL={measurement_parameters.accel}"
@@ -386,9 +388,8 @@ class LinearMovementVibrationsTest:
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", fname, "")
-            self._write_data_outfile(
-                out_directory, gcmd, outfile, frequency_response
-            )
+            self._write_data_outfile(out_directory, gcmd, outfile, frequency_response)
+
     def _get_accel(self, gcmd):
         # define max_accel from toolhead and check if user settings exceed max accel
         max_accel = self.toolhead.max_accel
@@ -465,16 +466,16 @@ class LinearMovementVibrationsTest:
         velocity_not_reached = True
         for i in range(len(data)):
             if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    == velocity
+                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                == velocity
             ):
                 data = data[i:]
                 velocity_not_reached = False
                 break
         for i in range(len(data)):
             if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    < velocity
+                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                < velocity
             ):
                 data = data[: i - 1]
                 break
@@ -572,7 +573,9 @@ class LinearMovementVibrationsTest:
 
     @staticmethod
     def _get_outfile_name(directory, fname, extension=".png"):
-        return directory + fname + "_" + datetime.datetime.today().isoformat() + extension
+        return (
+            directory + fname + "_" + datetime.datetime.today().isoformat() + extension
+        )
 
 
 def load_config(config):

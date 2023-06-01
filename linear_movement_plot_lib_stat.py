@@ -93,7 +93,9 @@ def plot_frequencies(
     ax2 = ax.twiny()
     ax2.set_xlim(ax.get_xlim())
     ax2.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
-    ax2.tick_params(axis="x", direction="in", pad=-15)
+    ax2.minorticks_on()
+
+    ax2.tick_params(axis="x", direction="out", pad=-1)
     ax2.set_xticklabels(
         [f"{measurement_parameters.velocity/x:.2f}" for x in ax.get_xticks()]
     )
@@ -114,15 +116,15 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("relative power")
+    # heuristics for visibility
+    markersize = 5 if len(data) < 200 else 2
     ax.plot(
         data[:, 0],
         data[:, 1:],
         marker="o",
         label=["x component", "y component", "z component"],
-        markersize=5,
+        markersize=markersize,
     )
-    # heuristics for visibility
-    markersize = 5 if len(data) < 200 else 2
     ax.plot(
         data[:, 0],
         np.sum(data[:, 1:], axis=1),
