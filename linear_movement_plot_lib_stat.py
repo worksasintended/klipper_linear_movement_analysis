@@ -19,7 +19,7 @@ def plot_frequencies(
     rotation_distance=None,
 ):
     plt.ioff()
-    fig = plt.figure(figsize=[6.4, 5.1])
+    fig = plt.figure(figsize=[6.4, 5.4])
     fig.suptitle(
         f"Vibrations while {measurement_parameters.velocity} mm/s linear movement on {measurement_parameters.axis} axis with {measurement_parameters.accel} mm/s^2",
         wrap=True,
@@ -27,7 +27,7 @@ def plot_frequencies(
     ax = plt.subplot(111)
     box = ax.get_position()
     # shrink and move up to allow legend beneeth
-    ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
+    #ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
@@ -92,7 +92,7 @@ def plot_frequencies(
     # add second abscissa
     ax2 = ax.twiny()
     ax2.set_xlim(ax.get_xlim())
-    ax2.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
+    #ax2.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax2.minorticks_on()
 
     ax2.tick_params(axis="x", direction="out", pad=-1)
@@ -100,6 +100,7 @@ def plot_frequencies(
         [f"{measurement_parameters.velocity/x:.2f}" for x in ax.get_xticks()]
     )
     ax2.set_xlabel("pattern distance in mm")
+    fig.tight_layout(pad=0.9)
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")
