@@ -200,6 +200,7 @@ class LinearMovementVibrationsTest:
             os.makedirs(self.out_directory)
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
+        self.initAccel = self.printer.lookup_object("max_accel")
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
@@ -295,6 +296,7 @@ class LinearMovementVibrationsTest:
         measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         gcmd.respond_info(f"measuring {measurement_parameters.velocity} mm/s")
+        gcmd.respond_info(f"max accel: {self.initAccel}")
 
         measurement_data = self._measure_linear_movement_vibrations(
             measurement_parameters, motion_report
@@ -382,6 +384,9 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+
 
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
