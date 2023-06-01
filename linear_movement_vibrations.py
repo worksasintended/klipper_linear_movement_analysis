@@ -386,7 +386,7 @@ class LinearMovementVibrationsTest:
         ]
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-
+        pass
 
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
