@@ -200,7 +200,7 @@ class LinearMovementVibrationsTest:
             os.makedirs(self.out_directory)
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
-        self.initAccel = self.printer.lookup_object("max_accel")
+        self.initAccel = config.get("max_accel")
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
