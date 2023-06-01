@@ -19,7 +19,7 @@ def plot_frequencies(
     rotation_distance=None,
 ):
     plt.ioff()
-    fig = plt.figure()
+    fig = plt.figure(figsize=[6.4, 5.1])
     fig.suptitle(
         f"Vibrations while {measurement_parameters.velocity} mm/s linear movement on {measurement_parameters.axis} axis with {measurement_parameters.accel} mm/s^2",
         wrap=True,
