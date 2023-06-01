@@ -1,4 +1,5 @@
 # This file describes the Python package requirements for
 # the linear movement analysis extention. 
-matplotlib
-scipy
+matplotlib~=3.7.1
+scipy~=1.10.1
+numpy~=1.24.3

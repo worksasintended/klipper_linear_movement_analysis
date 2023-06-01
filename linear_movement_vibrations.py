@@ -13,13 +13,14 @@ import os
 import numpy as np
 from scipy import signal
 from . import linear_movement_plot_lib_stat as plotlib
+from dataclasses import dataclass
 
 
 def calculate_total_power(data):
     """Calculate the mean square of 3d acceleration data for each vibration component.
         The acceleration data is corrected by subtracting the mean (assuming mean = earth accel)
 
-    Parameters
+    measurement_parameters
     ----------
     data :  array[[t0, x0, y0, z0],...,[tn, xn, yn, zn]]
 
@@ -37,7 +38,7 @@ def calculate_total_power(data):
 def calculate_frequencies(data, f_max, f_min):
     """Calculates the frequency spectrum via fft in a given dataset.
 
-    Parameters
+    measurement_parameters
     ----------
     data :  array[[t0, x0, y0, z0],...,[tn, xn, yn, zn]]
     f_max : float
@@ -68,7 +69,7 @@ def verify_and_correct_diagonal_move(p1_x, p1_y, p2_x, p2_y):
     by using the point towards the center which is the closest
     to the original fulfilling diagonality.
 
-    Parameters
+    measurement_parameters
     ----------
     p1_x p1_y : x and y coordinate start point
     p2_x p2_y : x and y coordinate end point
@@ -107,7 +108,7 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
     )
     if full_steps % 4:
         raise config.error(
-            "full_steps_per_rotation invalid in section '%s'" % (config.get_name(),)
+            f"full_steps_per_rotation invalid in section '{config.get_name()}'"
         )
     gearing = parse_gear_ratio(config, note_valid)
     return rotation_dist, full_steps * gearing
@@ -150,7 +151,24 @@ class LinearMovementVibrationsTest:
         [ACCEL=<set acceleration default max_accel>]`
     """
 
+    @dataclass()
+    class MeasurementParameters:
+        axis: str
+        v_min: int
+        v_max: int
+        v_step: int
+        velocity: float
+        accel: float
+        f_max: float
+        f_min: float
+        start_pos: list
+        end_pos: list
+        limits: tuple
+        freqs_per_v: int
+
     def __init__(self, config):
+        self.toolhead = None
+        self.accel_chips = None
         self.printer = config.get_printer()
         self.printer.register_event_handler("klippy:connect", self.connect)
         self.gcode = self.printer.lookup_object("gcode")
@@ -178,32 +196,37 @@ class LinearMovementVibrationsTest:
                 self.accel_chip_names = [("xy", self.accel_chip_names[0][1])]
 
         self.out_directory = config.get("output_directory")
+        if not os.path.exists(self.out_directory):
+            os.makedirs(self.out_directory)
         self.limits = self._get_limits_from_config(config)
         self.stepper_configs = self._get_stepper_configs(config)
 
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
-        axis = self._get_axis(gcmd)
+        measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
-        v_min, v_max, v_step = self._get_velocity_range(gcmd)
-        accel = self._get_accel(gcmd)
-        f_max = gcmd.get_int("FMAX", 2 * v_max)
-        velocity_range = range(v_min, v_max + 1, v_step)
+        velocity_range = range(
+            measurement_parameters.v_min,
+            measurement_parameters.v_max + 1,
+            measurement_parameters.v_step,
+        )
         powers = np.zeros((len(velocity_range), 4))
-        freqs_per_v = gcmd.get_int("FREQS_PER_V", 3)
-        if freqs_per_v == 0:
-            freqs_per_v = 1
+
         peak_frequencies = []
         frequency_responses = []
-        limits = self._get_limits_from_gcode(gcmd, self.limits)
-        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
+
         for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
+            measurement_parameters.velocity = velocity
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
-                gcmd, accel, velocity, start_pos, end_pos, motion_report
+                measurement_parameters, motion_report
             )
             frequency_response = np.array(
-                calculate_frequencies(measurement_data, f_max, gcmd.get_int("FMIN", 5))
+                calculate_frequencies(
+                    measurement_data,
+                    measurement_parameters.f_max,
+                    measurement_parameters.f_min,
+                )
             )
             mapped_frequency_response = self._map_r3_response_to_single_axis(
                 frequency_response
@@ -219,11 +242,12 @@ class LinearMovementVibrationsTest:
                 distance=1,
             )
             mapped_frequency_response_peaks = mapped_frequency_response[peak_idxs]
-            if freqs_per_v > len(peak_idxs):
-                freqs_per_v = -1
+            if measurement_parameters.freqs_per_v > len(peak_idxs):
+                measurement_parameters.freqs_per_v = -1
             freqs_per_vs = np.argpartition(
-                mapped_frequency_response_peaks, int(-freqs_per_v)
-            )[int(-freqs_per_v) :]
+                mapped_frequency_response_peaks,
+                int(-measurement_parameters.freqs_per_v),
+            )[int(-measurement_parameters.freqs_per_v):]
             peak_frequencies.append(
                 [
                     np.repeat(velocity, len(freqs_per_vs)),
@@ -235,101 +259,107 @@ class LinearMovementVibrationsTest:
             power = calculate_total_power(measurement_data)
             powers[vel_idx, 1:4] = power[1:4]
             powers[vel_idx, 0] = velocity
-            start_pos_last = start_pos
-            start_pos = end_pos
-            end_pos = start_pos_last
+            start_pos_last = measurement_parameters.start_pos
+            measurement_parameters.start_pos = measurement_parameters.end_pos
+            measurement_parameters.end_pos = start_pos_last
 
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
-        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
-            outfile = self._get_outfile_name("", "frequency_responses", "")
-            self._write_data_outfile(
-                self.out_directory, gcmd, outfile, frequency_responses
-            )
+        self._export_fft_data(frequency_responses, gcmd, self.out_directory, "frequency_responses")
 
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotlib.plot_relative_power(powers, outfile, axis, accel, gcmd)
+        plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
         )
         rotation_dist, step_distance = self._get_step_distance(
-            axis, self.stepper_configs
+            measurement_parameters.axis, self.stepper_configs
         )
         plotlib.plot_peak_frequencies(
             peak_frequencies,
             outfile,
             outfilelog,
-            axis,
-            accel,
+            measurement_parameters,
             gcmd,
             d=gcmd.get_float("D_IDLER", None),
             step_distance=step_distance,
             rotation_distance=rotation_dist,
-            f_max=f_max,
         )
         outfile = self._get_outfile_name(
             self.out_directory, "frequency_responses_v-range"
         )
         plotlib.plot_frequency_responses_over_velocity(
-            frequency_responses, outfile, axis, accel, gcmd
+            frequency_responses, outfile, measurement_parameters, gcmd
         )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
-        axis = self._get_axis(gcmd)
-        velocity = self._get_velocity(gcmd)
-        accel = self._get_accel(gcmd)
+        measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
-        limits = self._get_limits_from_gcode(gcmd, self.limits)
-        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
+        gcmd.respond_info(f"measuring {measurement_parameters.velocity} mm/s")
+
         measurement_data = self._measure_linear_movement_vibrations(
-            gcmd, accel, velocity, start_pos, end_pos, motion_report
-        )
-        f_max = gcmd.get_int("FMAX", 2 * velocity)
-        frequency_response = calculate_frequencies(
-            measurement_data, f_max, gcmd.get_int("FMIN", 5)
+            measurement_parameters, motion_report
         )
 
-        if not os.path.exists(self.out_directory):
-            os.makedirs(self.out_directory)
-        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
-            outfile = self._get_outfile_name("", "frequency_response", "")
-            self._write_data_outfile(
-                self.out_directory, gcmd, outfile, frequency_response
-            )
-        outfile = self._get_outfile_name(
-            self.out_directory, ("linear_movement_response_" + str(velocity) + "mmps_")
+        frequency_response = calculate_frequencies(
+            measurement_data, measurement_parameters.f_max, measurement_parameters.f_min
         )
+
+        self._export_fft_data(frequency_response, gcmd, self.out_directory, "frequency_response")
+
+        outfile = self._get_outfile_name(
+            self.out_directory,
+            (
+                    "linear_movement_response_"
+                    + str(measurement_parameters.velocity)
+                    + "mmps_"
+            ),
+        )
+
         rotation_dist, step_distance = self._get_step_distance(
-            axis, self.stepper_configs
+            measurement_parameters.axis, self.stepper_configs
         )
         plotlib.plot_frequencies(
             frequency_response,
             outfile,
-            accel,
-            velocity,
-            axis,
+            measurement_parameters,
             gcmd,
             d=gcmd.get_float("D_IDLER", None),
             step_distance=step_distance,
             rotation_distance=rotation_dist,
-            f_max=f_max,
         )
 
+
+
     def _measure_linear_movement_vibrations(
-        self, gcmd, accel, velocity, start_pos, end_pos, motion_report
+            self, measurement_parameters, motion_report
     ):
         self.gcode.run_script_from_command(
-            f"SET_VELOCITY_LIMIT ACCEL={accel} ACCEL_TO_DECEL={accel}"
+            f"SET_VELOCITY_LIMIT ACCEL={measurement_parameters.accel} ACCEL_TO_DECEL={measurement_parameters.accel}"
         )
         x_pos, y_pos, z_pos, e_pos = self.toolhead.get_position()
-        self.toolhead.move([start_pos[0], start_pos[1], z_pos, e_pos], velocity)
+        self.toolhead.move(
+            [
+                measurement_parameters.start_pos[0],
+                measurement_parameters.start_pos[1],
+                z_pos,
+                e_pos,
+            ],
+            measurement_parameters.velocity,
+        )
         self.toolhead.wait_moves()
         measurement_handler = [
             (adxl_axis_attached, accel_chip.start_internal_client())
             for adxl_axis_attached, accel_chip in self.accel_chips
         ]
-        self.toolhead.move([end_pos[0], end_pos[1], z_pos, e_pos], velocity)
+        self.toolhead.move(
+            [
+                measurement_parameters.end_pos[0],
+                measurement_parameters.end_pos[1],
+                z_pos,
+                e_pos,
+            ],
+            measurement_parameters.velocity,
+        )
         self.toolhead.wait_moves()
         measurement_data = []
         # stop measurement
@@ -341,7 +371,7 @@ class LinearMovementVibrationsTest:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
                 accel_chip_client.finish_measurements()
         measurement_data_stripped = self._strip_to_linear_velocity_share(
-            velocity, measurement_data, motion_report, self.gcode
+            measurement_parameters.velocity, measurement_data, motion_report, self.gcode
         )
         return measurement_data_stripped
 
@@ -353,6 +383,12 @@ class LinearMovementVibrationsTest:
             for chip_axis, chip_name in self.accel_chip_names
         ]
 
+    def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
+        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
+            outfile = self._get_outfile_name("", fname, "")
+            self._write_data_outfile(
+                out_directory, gcmd, outfile, frequency_response
+            )
     def _get_accel(self, gcmd):
         # define max_accel from toolhead and check if user settings exceed max accel
         max_accel = self.toolhead.max_accel
@@ -364,15 +400,38 @@ class LinearMovementVibrationsTest:
             )
         return accel
 
-    @staticmethod
-    def _write_data_outfile(directory, gcmd, fname, data):
-        """Write data into out_directory/raw_data/fname by np.savez."""
+    def _get_measurement_parameters(self, gcmd):
+        axis = self._get_axis(gcmd)
+        v_min, v_max, v_step = self._get_velocity_range(gcmd)
+        velocity = self._get_velocity(gcmd)
+        accel = self._get_accel(gcmd)
+        f_max = gcmd.get_int("FMAX", 2 * v_max)
+        f_min = gcmd.get_int("FMIN", 5)
+        limits = self._get_limits_from_gcode(gcmd, self.limits)
+        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
+        freqs_per_v = self._get_freqs_per_v(gcmd)
 
-        if not os.path.exists(directory + "raw_data"):
-            os.makedirs(directory + "raw_data")
-        outfile = directory + "raw_data/" + fname
-        np.savez(outfile, data=np.array(data, dtype=object))
-        gcmd.respond_info(f"data output written to {outfile}")
+        return self.MeasurementParameters(
+            axis,
+            v_min,
+            v_max,
+            v_step,
+            velocity,
+            accel,
+            f_max,
+            f_min,
+            start_pos,
+            end_pos,
+            limits,
+            freqs_per_v,
+        )
+
+    @staticmethod
+    def _get_freqs_per_v(gcmd):
+        freqs_per_v = gcmd.get_int("FREQS_PER_V", 3)
+        if freqs_per_v == 0:
+            freqs_per_v = 1
+        return freqs_per_v
 
     @staticmethod
     def _write_data_outfile(directory, gcmd, fname, data):
@@ -406,18 +465,18 @@ class LinearMovementVibrationsTest:
         velocity_not_reached = True
         for i in range(len(data)):
             if (
-                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                == velocity
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    == velocity
             ):
                 data = data[i:]
                 velocity_not_reached = False
                 break
         for i in range(len(data)):
             if (
-                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                < velocity
+                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                    < velocity
             ):
-                data = data[0 : (i - 1)]
+                data = data[: i - 1]
                 break
         if velocity_not_reached or len(data) < 300:
             raise gcmd.error(
@@ -513,7 +572,7 @@ class LinearMovementVibrationsTest:
 
     @staticmethod
     def _get_outfile_name(directory, fname, extension=".png"):
-        return directory + fname + datetime.datetime.today().isoformat() + extension
+        return directory + fname + "_" + datetime.datetime.today().isoformat() + extension
 
 
 def load_config(config):
