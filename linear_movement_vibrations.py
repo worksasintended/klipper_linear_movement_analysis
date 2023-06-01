@@ -12,7 +12,7 @@ import datetime
 import os
 import numpy as np
 from scipy import signal
-import linear_movement_plot_lib_stat as plotlib
+from . import linear_movement_plot_lib_stat as plotlib
 from dataclasses import dataclass
 
 
