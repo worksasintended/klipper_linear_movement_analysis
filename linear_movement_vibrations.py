@@ -317,6 +317,8 @@ class LinearMovementVibrationsTest:
         measure_config = self._get_measure_config(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         measure_config.f_max = gcmd.get_int("FMAX", 2 * measure_config.velocity)
+        gcmd.respond_info(f"measuring {measure_config.velocity} mm/s")
+
         measurement_data = self._measure_linear_movement_vibrations(
             measure_config, motion_report
         )
