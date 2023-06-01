@@ -104,24 +104,26 @@ def plot_frequencies(
 def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     data = np.array(data)
     plt.ioff()
-    plt.title(
+    fig, ax = plt.subplots()
+    fig.suptitle(
         f"Vibration power for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
         wrap=True,
     )
-    plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
-    plt.xlabel("velocity in mm/s")
-    plt.ylabel("relative power")
-    plt.plot(
+    ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
+    ax.set_xlabel("velocity in mm/s")
+    ax.set_ylabel("relative power")
+    ax.plot(
         data[:, 0],
         data[:, 1:],
         marker="o",
         label=["x component", "y component", "z component"],
+        markersize=5,
     )
-    plt.plot(data[:, 0], np.sum(data[:, 1:], axis=1), marker="o", label="total")
-    plt.legend(
-        loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data"
+    ax.plot(
+        data[:, 0], np.sum(data[:, 1:], axis=1), marker="o", label="total", markersize=5
     )
-    plt.savefig(outfile)
+    ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data")
+    fig.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")
 
@@ -142,7 +144,7 @@ def plot_peak_frequencies(
     velocities = np.concatenate(velocities)
     peak_ffts = np.concatenate(peak_ffts)
     peak_freqs = np.concatenate(peak_freqs)
-    peak_ffts = peak_ffts ** (0.8)
+    #peak_ffts = peak_ffts ** (0.8) try out without rescaling 
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
     peak_height_to_size = 90 * normalized_peak_heights
@@ -215,11 +217,13 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     )
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
-    for velocity_sample in data:
+    # fix visuals with simple heuristic
+    line_width = 1 if len(data) < 25 else np.exp(-(len(data)) / 40) + 0.2
+    for velocity_sample in data[::-1]:
         x = velocity_sample[1]
         y = velocity_sample[2]
         z = velocity_sample[0]
-        ax.plot(x, y, zs=z, zdir="y")
+        ax.plot(x, y, zs=z, zdir="y", c="black", lw=line_width)
     ax.set_xlabel("f in Hz")
     ax.set_zlabel("relative response")
     ax.set_ylabel("velocity")
