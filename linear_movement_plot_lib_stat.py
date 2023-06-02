@@ -33,6 +33,8 @@ def plot_frequencies(
     ax.plot(data[0], data[3], label="z")
     ax.grid()
     ax.minorticks_on()
+    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
@@ -66,8 +68,8 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("relative power")
-    # heuristics for visibility
-    markersize = 5 if len(data) < 200 else 2
+    # heuristics for  visibility
+    markersize = 4 if len(data) < 100 else 2
     ax.plot(
         data[:, 0],
         data[:, 1:],
@@ -85,6 +87,9 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     )
     ax.grid()
     ax.minorticks_on()
+    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+
     ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data")
     fig.tight_layout(pad=0.9)
 
@@ -122,7 +127,10 @@ def plot_peak_frequencies(
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
+    ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
     ax.minorticks_on()
+    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
     for length, name, color in known_causes:
         ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
     ax.legend(
