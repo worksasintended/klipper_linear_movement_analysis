@@ -381,7 +381,7 @@ class LinearMovementVibrationsTest:
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
                 accel_chip_client.finish_measurements()
-          = self._strip_to_linear_velocity_share(
+        measurement_data_stripped = self._strip_to_linear_velocity_share(
             measurement_parameters.velocity, measurement_data, motion_report, self.gcode
         )
         return measurement_data_stripped
