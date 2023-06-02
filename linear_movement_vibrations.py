@@ -111,6 +111,7 @@ def parse_full_step_distance(config, units_in_radians=None, note_valid=False):
             f"full_steps_per_rotation invalid in section '{config.get_name()}'"
         )
     gearing = parse_gear_ratio(config, note_valid)
+    # full_steps * gearing = steps_per_full_rotation ("step_distance")
     return rotation_dist, full_steps * gearing
 
 
@@ -273,18 +274,15 @@ class LinearMovementVibrationsTest:
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
         )
-        rotation_dist, step_distance = self._get_step_distance(
-            measurement_parameters.axis, self.stepper_configs
-        )
+        known_causes = self._set_theory(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
+        
         plotlib.plot_peak_frequencies(
             peak_frequencies,
             outfile,
             outfilelog,
             measurement_parameters,
             gcmd,
-            d=gcmd.get_float("D_IDLER", None),
-            step_distance=step_distance,
-            rotation_distance=rotation_dist,
+            known_causes,
         )
         outfile = self._get_outfile_name(
             self.out_directory, "frequency_responses_v-range"
@@ -319,17 +317,13 @@ class LinearMovementVibrationsTest:
             ),
         )
 
-        rotation_dist, step_distance = self._get_step_distance(
-            measurement_parameters.axis, self.stepper_configs
-        )
+        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
         plotlib.plot_frequencies(
             frequency_response,
             outfile,
             measurement_parameters,
             gcmd,
-            d=gcmd.get_float("D_IDLER", None),
-            step_distance=step_distance,
-            rotation_distance=rotation_dist,
+            known_causes,
         )
 
     def _measure_linear_movement_vibrations(
@@ -426,6 +420,25 @@ class LinearMovementVibrationsTest:
             limits,
             freqs_per_v,
         )
+
+    
+    def _known_causes(self, d, measurement_parameters):
+        """TODO: Explanation of the length factors
+        """
+        known_causes = [(2,"2gt belt pitch"), (1.21, "2gt belt teeth width"),
+         (0.8, "2gt belt valley width"), (.4, "2gt belt valley flat width")]
+        
+        rotation_distance, steps_per_full_rotation = self._get_step_distance(
+            measurement_parameters.axis, self.stepper_configs
+        )
+        if d is not None:
+            known_causes.append((np.pi * d,"idler rotation"))
+
+        if rotation_distance is not None:
+            known_causes.append((rotation_distance,"pulley rotation"))
+            if steps_per_full_rotation is not None:
+                known_causes.append(rotation_distance/steps_per_full_rotation,"motor step")
+        return known_causes
 
     @staticmethod
     def _get_freqs_per_v(gcmd):
