@@ -398,8 +398,8 @@ class LinearMovementVibrationsTest:
 
     def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
         self.toolhead.max_accel = self.max_accel
-        for adxl_axis_attached, accel_chip in self.accel_chips:
-            accel_chip.finish_measurements()
+        #for adxl_axis_attached, accel_chip in self.accel_chips:
+        #    accel_chip.finish_measurements()
 
         if state.value == "error":
             raise self.gcode.error(message)
