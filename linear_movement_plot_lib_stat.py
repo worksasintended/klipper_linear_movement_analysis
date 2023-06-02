@@ -17,7 +17,7 @@ def plot_frequencies(
     known_causes
 ):
     plt.ioff()
-    fig, ax = plt.figure(figsize=[6.4, 5.4])
+    fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
         f"Vibrations while {measurement_parameters.velocity} mm/s linear movement on {measurement_parameters.axis} axis with {measurement_parameters.accel} mm/s^2",
         wrap=True,
