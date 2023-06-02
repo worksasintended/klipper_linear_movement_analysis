@@ -363,7 +363,7 @@ class LinearMovementVibrationsTest:
         )
         self.toolhead.wait_moves()
         for adxl_axis_attached, accel_chip_client in adxl_handler:
-            accel_chip_client.start_measurement()
+            accel_chip_client.start_measurements()
         self.toolhead.move(
             [
                 measurement_parameters.end_pos[0],
