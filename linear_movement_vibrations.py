@@ -375,7 +375,7 @@ class LinearMovementVibrationsTest:
         self.toolhead.wait_moves()
         measurement_data = []
         # stop measurement
-        for adxl_axis_attached, accel_chip_client in measurement_handler:
+        for adxl_axis_attached, accel_chip_client in adxl_handler:
             accel_chip_client.finish_measurements()
             if not accel_chip_client.has_valid_samples():
                 raise self.gcode.error("No data received from accelerometer")
