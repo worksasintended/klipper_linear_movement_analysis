@@ -425,7 +425,7 @@ class LinearMovementVibrationsTest:
     def _known_causes(self, measurement_parameters, d):
         """TODO: Explanation of the length factors
         """
-        known_causes = [(2,"2gt belt pitch", '#EC2029'), (1.21, "2gt belt teeth width", '#FA7909'),
+        known_causes = [(2,"2gt belt pitch", ), (1.21, "2gt belt teeth width", '#FA7909'),
          (0.8, "2gt belt valley width", '#ECD707'), (.4, "2gt belt valley flat width", '#0F9944')]
         
         rotation_distance, steps_per_full_rotation = self._get_step_distance(
@@ -435,9 +435,10 @@ class LinearMovementVibrationsTest:
             known_causes.append((np.pi * d,"idler rotation", '#0356C2'))
 
         if rotation_distance is not None:
-            known_causes.append((rotation_distance,"pulley rotation", '#4F058C'))
+            known_causes.append((rotation_distance,"pulley rotation", 'grey'))
             if steps_per_full_rotation is not None:
-                known_causes.append((rotation_distance/steps_per_full_rotation,"motor step", 'grey'))
+                known_causes.append((rotation_distance/steps_per_full_rotation,"motor step",'#4F058C'))
+        colors = ['#EC2029']
         return known_causes
 
     @staticmethod
