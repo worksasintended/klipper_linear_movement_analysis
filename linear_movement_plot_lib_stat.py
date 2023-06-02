@@ -119,8 +119,6 @@ def plot_peak_frequencies(
         f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
         wrap=True,
     )
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.18, box.width, box.height * 0.85])
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
