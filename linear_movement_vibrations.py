@@ -362,10 +362,7 @@ class LinearMovementVibrationsTest:
             measurement_parameters.velocity,
         )
         self.toolhead.wait_moves()
-        measurement_handler = [
-            (adxl_axis_attached, accel_chip.start_internal_client())
-            for adxl_axis_attached, accel_chip in self.accel_chips
-        ]
+        measurement_handler = self._get_init_adxl_handler()
         self.toolhead.move(
             [
                 measurement_parameters.end_pos[0],
