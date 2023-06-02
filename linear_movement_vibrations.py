@@ -362,8 +362,7 @@ class LinearMovementVibrationsTest:
             measurement_parameters.velocity,
         )
         self.toolhead.wait_moves()
-        #for adxl_axis_attached, accel_chip_client in adxl_handler:
-        #    accel_chip_client.start_measurements()
+        adxl_handler = self._get_init_adxl_handler()
         self.toolhead.move(
             [
                 measurement_parameters.end_pos[0],
@@ -382,7 +381,7 @@ class LinearMovementVibrationsTest:
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
                 accel_chip_client.finish_measurements()
-        measurement_data_stripped = self._strip_to_linear_velocity_share(
+          = self._strip_to_linear_velocity_share(
             measurement_parameters.velocity, measurement_data, motion_report, self.gcode
         )
         return measurement_data_stripped
