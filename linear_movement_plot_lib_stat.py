@@ -26,8 +26,8 @@ def plot_frequencies(
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
     ax.set_xlim(data[0][0], measurement_parameters.f_max)
-    for length, name in known_causes:
-        ax.axvline(x=measurement_parameters.velocity/length, label=name, lw=1, ls='--')
+    for length, name, color in known_causes:
+        ax.axvline(x=measurement_parameters.velocity/length, c=color, label=name, lw=1, ls='--')
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
     ax.plot(data[0], data[3], label="z")
@@ -123,8 +123,8 @@ def plot_peak_frequencies(
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
     ax.minorticks_on()
-    for length, name in known_causes:
-        ax.plot(velocities, velocities/length, label=name, lw=1)
+    for length, name, color in known_causes:
+        ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
