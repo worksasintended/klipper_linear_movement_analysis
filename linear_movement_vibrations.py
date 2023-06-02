@@ -221,13 +221,12 @@ class LinearMovementVibrationsTest:
         peak_frequencies = []
         frequency_responses = []
 
-        adxl_handler = self._get_init_adxl_handler()
         for vel_idx, velocity in enumerate(velocity_range):
             gcmd.respond_info(f"measuring {velocity} mm/s")
             measurement_parameters.velocity = velocity
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
-                measurement_parameters, motion_report, adxl_handler
+                measurement_parameters, motion_report
             )
             frequency_response = np.array(
                 calculate_frequencies(
@@ -304,9 +303,8 @@ class LinearMovementVibrationsTest:
         measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
         gcmd.respond_info(f"measuring {measurement_parameters.velocity} mm/s")
-        adxl_handler = self._get_init_adxl_handler()
         measurement_data = self._measure_linear_movement_vibrations(
-            measurement_parameters, motion_report, adxl_handler
+            measurement_parameters, motion_report
         )
 
         frequency_response = calculate_frequencies(
@@ -346,7 +344,7 @@ class LinearMovementVibrationsTest:
         return adxl_handler
 
     def _measure_linear_movement_vibrations(
-            self, measurement_parameters, motion_report, adxl_handler
+            self, measurement_parameters, motion_report
     ):
         self.gcode.run_script_from_command(
             f"SET_VELOCITY_LIMIT ACCEL={measurement_parameters.accel} ACCEL_TO_DECEL={measurement_parameters.accel}"
@@ -362,7 +360,7 @@ class LinearMovementVibrationsTest:
             measurement_parameters.velocity,
         )
         self.toolhead.wait_moves()
-        #measurement_handler = self._get_init_adxl_handler()
+        adxl_handler = self._get_init_adxl_handler()
         self.toolhead.move(
             [
                 measurement_parameters.end_pos[0],
@@ -378,7 +376,7 @@ class LinearMovementVibrationsTest:
         for adxl_axis_attached, accel_chip_client in adxl_handler:
             accel_chip_client.finish_measurements()
             if not accel_chip_client.has_valid_samples():
-                raise self.gcode.error("No data received from accelerometer")
+                self._exit_gcommand(GcommandExitType("error"),"No data received from accelerometer")
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
                 accel_chip_client.finish_measurements()
@@ -399,7 +397,9 @@ class LinearMovementVibrationsTest:
     def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
         self.toolhead.max_accel = self.max_accel
         for adxl_axis_attached, accel_chip in self.accel_chips:
-            accel_chip._finish_measurements()
+            if accel_chip.is_measuring():
+                # no way to reach it without using protected function as of now
+                accel_chip._finish_measurements()
 
         if state.value == "error":
             raise self.gcode.error(message)
