@@ -422,7 +422,7 @@ class LinearMovementVibrationsTest:
         )
 
     
-    def _known_causes(self, d, measurement_parameters):
+    def _known_causes(self, measurement_parameters, d):
         """TODO: Explanation of the length factors
         """
         known_causes = [(2,"2gt belt pitch"), (1.21, "2gt belt teeth width"),
