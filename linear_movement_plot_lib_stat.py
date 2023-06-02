@@ -102,7 +102,7 @@ def plot_peak_frequencies(
     known_causes, 
 ):
     plt.ioff()
-    fig, ax = plt.subplots(figsize=(6.4, 5.4))
+    fig, ax = plt.subplots(figsize=(6.4, 5.6))
     velocities, peak_freqs, peak_ffts = zip(*data)
     velocities = np.concatenate(velocities)
     peak_ffts = np.concatenate(peak_ffts)
@@ -132,12 +132,12 @@ def plot_peak_frequencies(
         shadow=False,
         ncol=3,
     )
-    fig.tight_layout(pad=1)
+    fig.tight_layout(pad=0.8)
     plt.savefig(outfile)
     gcmd.respond_info(f"output written to {outfile}")
     ax.set_yscale("log")
     plt.axhline(
-        y=measurement_parameters.f_max, color="tab:olive", linestyle="--", label="f_max"
+        y=measurement_parameters.f_max, color="black", linestyle="--", label="f_max"
     )
     ax.legend(
         loc="upper center",
