@@ -274,7 +274,7 @@ class LinearMovementVibrationsTest:
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
         )
-        known_causes = self._set_theory(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
+        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
         
         plotlib.plot_peak_frequencies(
             peak_frequencies,
