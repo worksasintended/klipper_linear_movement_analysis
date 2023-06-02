@@ -102,7 +102,7 @@ def plot_peak_frequencies(
     known_causes, 
 ):
     plt.ioff()
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6.4, 5.4))
     velocities, peak_freqs, peak_ffts = zip(*data)
     velocities = np.concatenate(velocities)
     peak_ffts = np.concatenate(peak_ffts)

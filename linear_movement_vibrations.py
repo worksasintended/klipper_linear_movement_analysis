@@ -426,7 +426,7 @@ class LinearMovementVibrationsTest:
         """TODO: Explanation of the length factors
         """
         known_causes = [(2,"2gt belt pitch", '#EC2029'), (1.21, "2gt belt teeth width", '#FA7909'),
-         (0.8, "2gt belt valley width", '#F6E60B'), (.4, "2gt belt valley flat width", '#0F9944')]
+         (0.8, "2gt belt valley width", '#ECD707'), (.4, "2gt belt valley flat width", '#0F9944')]
         
         rotation_distance, steps_per_full_rotation = self._get_step_distance(
             measurement_parameters.axis, self.stepper_configs
