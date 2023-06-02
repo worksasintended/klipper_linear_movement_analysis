@@ -38,7 +38,7 @@ def plot_frequencies(
         bbox_to_anchor=(0.5, -0.13),
         fancybox=True,
         shadow=False,
-        ncol=4,
+        ncol=3,
     )
     # add second abscissa
     ax2 = ax.twiny()
@@ -126,7 +126,7 @@ def plot_peak_frequencies(
     ax.set_ylim(0, measurement_parameters.f_max)
     ax.minorticks_on()
     for length, name in known_causes:
-        ax.plot(velocities, velocities/length, label=length, lw=1)
+        ax.plot(velocities, velocities/length, label=name, lw=1)
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
