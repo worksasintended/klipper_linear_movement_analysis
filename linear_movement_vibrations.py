@@ -437,7 +437,7 @@ class LinearMovementVibrationsTest:
         if rotation_distance is not None:
             known_causes.append((rotation_distance,"pulley rotation"))
             if steps_per_full_rotation is not None:
-                known_causes.append(rotation_distance/steps_per_full_rotation,"motor step")
+                known_causes.append((rotation_distance/steps_per_full_rotation,"motor step"))
         return known_causes
 
     @staticmethod
