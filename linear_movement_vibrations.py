@@ -397,58 +397,6 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
-
-    def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
-        if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
-            outfile = self._get_outfile_name("", fname, "")
-            self._write_data_outfile(
-                out_directory, gcmd, outfile, frequency_response
-            )
-
-    def _get_accel(self, gcmd):
-        # define max_accel from toolhead and check if user settings exceed max accel
-        max_accel = self.toolhead.max_accel
-        accel = gcmd.get_int("ACCEL", max_accel)
-        if accel > max_accel:
-            accel = max_accel
-            gcmd.respond_info(
-                f"Warning: Cannot exceed machine limits. Acceleration set to {max_accel} mm/s^2"
-            )
-        return accel
-
-    def _get_measurement_parameters(self, gcmd):
-        axis = self._get_axis(gcmd)
-        v_min, v_max, v_step = self._get_velocity_range(gcmd)
-        velocity = self._get_velocity(gcmd)
-        accel = self._get_accel(gcmd)
-        f_max = gcmd.get_int("FMAX", 2 * v_max)
-        f_min = gcmd.get_int("FMIN", 5)
-        limits = self._get_limits_from_gcode(gcmd, self.limits)
-        start_pos, end_pos = self._get_move_positions(axis, limits, gcmd)
-        freqs_per_v = self._get_freqs_per_v(gcmd)
-
-        return self.MeasurementParameters(
-            axis,
-            v_min,
-            v_max,
-            v_step,
-            velocity,
-            accel,
-            f_max,
-            f_min,
-            start_pos,
-            end_pos,
-            limits,
-            freqs_per_v,
-        )
-
-    def connect(self):
-        self.toolhead = self.printer.lookup_object("toolhead")
-        # identical to ResonanceTester.connect, should be moved to helper function on merge
-        self.accel_chips = [
-            (chip_axis, self.printer.lookup_object(chip_name))
-            for chip_axis, chip_name in self.accel_chip_names
-        ]
         self.max_accel = self.toolhead.max_accel
 
     def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
