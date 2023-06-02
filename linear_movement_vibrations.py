@@ -362,8 +362,8 @@ class LinearMovementVibrationsTest:
             measurement_parameters.velocity,
         )
         self.toolhead.wait_moves()
-        #for adxl_axis_attached, accel_chip_client in adxl_handler:
-        #    accel_chip_client.start_measurements()
+        for adxl_axis_attached, accel_chip_client in adxl_handler:
+            accel_chip_client.start_measurements()
         self.toolhead.move(
             [
                 measurement_parameters.end_pos[0],
@@ -398,8 +398,8 @@ class LinearMovementVibrationsTest:
 
     def _exit_gcommand(self, state=GcommandExitType("success"), message=None):
         self.toolhead.max_accel = self.max_accel
-        #for adxl_axis_attached, accel_chip in self.accel_chips:
-        #    accel_chip.finish_measurements()
+        for adxl_axis_attached, accel_chip in self.accel_chips:
+            accel_chip._finish_measurements()
 
         if state.value == "error":
             raise self.gcode.error(message)
