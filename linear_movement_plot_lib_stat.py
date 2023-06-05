@@ -19,7 +19,7 @@ def plot_frequencies(
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"vibration profile at constant velocity {measurement_parameters.velocity} mm/s along {measurement_parameters.axis}",
+        f"vibration profile at constant velocity {measurement_parameters.velocity} mm/s along {measurement_parameters.axis} axis",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -62,7 +62,7 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     plt.ioff()
     fig, ax = plt.subplots()
     fig.suptitle(
-        f"vibration power at constant velocity along {measurement_parameters.axis}",
+        f"vibration power at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
     ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -137,7 +137,7 @@ def plot_peak_frequencies(
             velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o", cmap='magma'
         )
     fig.suptitle(
-        f"vibration peak frequencies at constant velocity along axis {measurement_parameters.axis}",
+        f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
     ax.set_xlabel("velocity in mm/s")
@@ -166,7 +166,7 @@ def plot_peak_frequencies(
         plt.autoscale(True)
         ax.minorticks_off()
         fig.suptitle(
-            fr"Vibration peak frequencies at constant velocity along axis {measurement_parameters.axis}, $f_{max}$ = {measurement_parameters.f_max} Hz",
+            fr"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, $f_{max}$ = {measurement_parameters.f_max} Hz",
             wrap=True,
         )
         ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
@@ -183,7 +183,7 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     ax = fig.add_subplot(projection="3d")
 
     fig.suptitle(
-        f"Vibration spectrum at constant velocity along axis {measurement_parameters.axis}"
+        f"vibration spectrum at constant velocity along {measurement_parameters.axis} axis "
     )
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
