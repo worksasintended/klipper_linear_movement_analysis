@@ -6,6 +6,7 @@
 # This file may be distributed under the terms of the GNU GPLv3 license.
 
 from matplotlib import pyplot as plt
+from matplotlib import patheffects
 import numpy as np
 
 
@@ -25,6 +26,8 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
     ax.set_xlim(data[0][0], measurement_parameters.f_max)
+    outline=patheffects.withStroke(linewidth=1.2, foreground='black')
+
     for length, name, color in known_causes:
         ax.axvline(
             x=measurement_parameters.velocity / length,
@@ -32,6 +35,7 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
             label=name,
             lw=1,
             ls="--",
+            path_effects=[outline]
         )
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
@@ -125,9 +129,10 @@ def plot_peak_frequencies(
     peak_freqs = np.concatenate(peak_freqs)
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-    peak_height_to_size = 110 * normalized_peak_heights
+    peak_height_to_size = 100 * normalized_peak_heights
+    outline=patheffects.withStroke(linewidth=1.2, foreground='black')
     for length, name, color in known_causes:
-        ax.plot(velocities, velocities / length, c=color, label=name, lw=1)
+        ax.plot(velocities, velocities / length, c=color, label=name, lw=1, path_effects=[outline])
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.10),
