@@ -19,7 +19,7 @@ def plot_frequencies(
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"Vibrations while {measurement_parameters.velocity} mm/s linear movement on {measurement_parameters.axis} axis with {measurement_parameters.accel} mm/s^2",
+        f"Vibrations with velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis} axis with accel {measurement_parameters.accel} mm/s^2",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -107,19 +107,34 @@ def plot_peak_frequencies(
     known_causes, 
 ):
     plt.ioff()
-    fig, ax = plt.subplots(figsize=(6.4, 5.65))
+    fig, ax = plt.subplots(figsize=(6.4, 5.7))
     velocities, peak_freqs, peak_ffts = zip(*data)
     velocities = np.concatenate(velocities)
     peak_ffts = np.concatenate(peak_ffts)
     peak_freqs = np.concatenate(peak_freqs)
-    # peak_ffts = peak_ffts ** (0.8) try out without rescaling
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-    peak_height_to_size = 110 * normalized_peak_heights
-    scatter = ax.scatter(
-        velocities, peak_freqs, c="black", s=peak_height_to_size, marker="o"
-    )
 
+    if len(data)<200 and measurement_parameters.freqs_per_v!= -1:
+        peak_height_to_size = 110 * normalized_peak_heights
+        c = 'black'
+        for length, name, color in known_causes:
+            ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.10),
+            fancybox=True,
+            shadow=False,
+            ncol=3,
+        )
+    else:
+        peak_ffts = peak_ffts ** (0.8) 
+        normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
+        peak_height_to_size =  90 * normalized_peak_heights**2
+        c = normalized_peak_heights
+    scatter = ax.scatter(
+            velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o"
+        )
     fig.suptitle(
         f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
         wrap=True,
@@ -131,38 +146,31 @@ def plot_peak_frequencies(
     ax.minorticks_on()
     ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
     ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
-    for length, name, color in known_causes:
-        ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
-    ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.11),
-        fancybox=True,
-        shadow=False,
-        ncol=3,
-    )
     fig.tight_layout(pad=0.9)
-    plt.savefig(outfile)
+    plt.savefig(outfile, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfile}")
-    ax.set_yscale("log")
-    plt.axhline(
-        y=measurement_parameters.f_max, color="black", linestyle="--", label="f_max"
-    )
-    ax.legend(
-        loc="upper center",
-        bbox_to_anchor=(0.5, -0.13),
-        fancybox=True,
-        shadow=False,
-        ncol=3,
-    )
-    ax.set_autoscaley_on(True)
-    ax.minorticks_on()
-    plt.autoscale(True)
-    fig.suptitle(
-        f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2, f_max = {measurement_parameters.f_max} Hz",
-        wrap=True,
-    )
-    plt.savefig(outfilelog)
-    gcmd.respond_info(f"output written to {outfilelog}")
+    if len(data)<200 and measurement_parameters.freqs_per_v!= -1:
+        ax.set_yscale("log")
+        plt.axhline(
+            y=measurement_parameters.f_max, color="black", linestyle="--", label="f_max"
+        )
+        ax.legend(
+            loc="upper center",
+            bbox_to_anchor=(0.5, -0.13),
+            fancybox=True,
+            shadow=False,
+            ncol=3,
+        )
+        ax.set_autoscaley_on(True)
+        plt.autoscale(True)
+        ax.minorticks_off()
+        fig.suptitle(
+            f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2, f_max = {measurement_parameters.f_max} Hz",
+            wrap=True,
+        )
+        fig.tight_layout(pad=0.9)
+        plt.savefig(outfilelog, bbox_inches="tight")
+        gcmd.respond_info(f"output written to {outfilelog}")
     plt.close("all")
 
 
