@@ -19,7 +19,7 @@ def plot_frequencies(
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"vibrations profile at constant velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis}",
+        f"vibration profile at constant velocity {measurement_parameters.velocity} mm/s along {measurement_parameters.axis}",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -62,7 +62,7 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     plt.ioff()
     fig, ax = plt.subplots()
     fig.suptitle(
-        f"Vibration power for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
+        f"vibration power at constant velocity along {measurement_parameters.axis}",
         wrap=True,
     )
     ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -90,7 +90,7 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
     ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
 
-    ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data")
+    ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data with accel {measurement_parameters.accel} mm/s^2")
     fig.tight_layout(pad=0.9)
 
     fig.savefig(outfile)
@@ -137,7 +137,7 @@ def plot_peak_frequencies(
             velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o", cmap='magma'
         )
     fig.suptitle(
-        f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
+        f"vibration peak frequencies at constant velocity along axis {measurement_parameters.axis}",
         wrap=True,
     )
     ax.set_xlabel("velocity in mm/s")
@@ -166,10 +166,10 @@ def plot_peak_frequencies(
         plt.autoscale(True)
         ax.minorticks_off()
         fig.suptitle(
-            f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2, f_max = {measurement_parameters.f_max} Hz",
+            fr"Vibration peak frequencies at constant velocity along axis {measurement_parameters.axis}, $f_{max}$ = {measurement_parameters.f_max} Hz",
             wrap=True,
         )
-        ax.set_ylim(0, measurement_parameters.f_max)
+        ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
         fig.tight_layout(pad=0.9)
         plt.savefig(outfilelog, bbox_inches="tight")
         gcmd.respond_info(f"output written to {outfilelog}")
@@ -183,7 +183,7 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     ax = fig.add_subplot(projection="3d")
 
     fig.suptitle(
-        f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2"
+        f"Vibration spectrum at constant velocity along axis {measurement_parameters.axis}"
     )
 
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
