@@ -19,7 +19,7 @@ def plot_frequencies(
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"Vibrations with velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis} axis with accel {measurement_parameters.accel} mm/s^2",
+        f"Vibrations Profile at Constant Velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis}",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
@@ -169,6 +169,7 @@ def plot_peak_frequencies(
             f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2, f_max = {measurement_parameters.f_max} Hz",
             wrap=True,
         )
+        ax.set_ylim(0, measurement_parameters.f_max)
         fig.tight_layout(pad=0.9)
         plt.savefig(outfilelog, bbox_inches="tight")
         gcmd.respond_info(f"output written to {outfilelog}")
