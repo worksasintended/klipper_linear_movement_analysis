@@ -19,7 +19,7 @@ def plot_frequencies(
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"Vibrations Profile at Constant Velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis}",
+        f"vibrations profile at constant velocity {measurement_parameters.velocity} mm/s on {measurement_parameters.axis}",
         wrap=True,
     )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
