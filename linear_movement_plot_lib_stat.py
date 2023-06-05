@@ -13,7 +13,7 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
-        f"vibration profile at constant velocity {measurement_parameters.velocity} mm/s along {measurement_parameters.axis} axis",
+        f"vibration profile at constant {measurement_parameters.velocity} mm/s along {measurement_parameters.axis} axis",
         wrap=True,
     )
     ax.set_title(
@@ -171,8 +171,8 @@ def plot_peak_frequencies(
     )
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
-    ax.yaxis.grid(False)
     ax.minorticks_on()
+    ax.yaxis.grid(False)
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, f_max = {measurement_parameters.f_max} Hz",
         wrap=True,
