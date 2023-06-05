@@ -268,42 +268,7 @@ class LinearMovementVibrationsTest:
             frequency_responses, gcmd, self.out_directory, "frequency_responses"
         )
 
-        outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
-        outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
-        outfilelog = self._get_outfile_name(
-            self.out_directory, "peak_frequencies_logscale"
-        )
-        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
-        
-        plotlib.plot_peak_frequencies(
-            peak_frequencies,
-            outfile,
-            outfilelog,
-            measurement_parameters,
-            gcmd,
-            known_causes,
-        )
-        
-        if len(frequency_responses)<200 and measurement_parameters.freqs_per_v!= -1:
-            outfile = self._get_outfile_name(
-            self.out_directory, "frequency_responses_v-range"
-            )
-            plotlib.plot_frequency_responses_over_velocity(
-                frequency_responses, outfile, measurement_parameters, gcmd
-            )
-        else:
-            outfile = self._get_outfile_name(
-            self.out_directory, "peak_frequencies_cmap"
-            )
-            plotlib.plot_peak_frequencies_cmap(
-            peak_frequencies,
-            outfile,
-            outfilelog,
-            measurement_parameters,
-            gcmd,
-            known_causes,
-        )
+        self._call_plotlib(gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses)
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
@@ -392,6 +357,44 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
+    
+    def _call_plotlib(self, gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses):
+        outfile = self._get_outfile_name(self.out_directory, "relative_power")
+        plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
+        outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
+        outfilelog = self._get_outfile_name(
+            self.out_directory, "peak_frequencies_logscale"
+        )
+        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
+        
+        plotlib.plot_peak_frequencies(
+            peak_frequencies,
+            outfile,
+            outfilelog,
+            measurement_parameters,
+            gcmd,
+            known_causes,
+        )
+        
+        if len(frequency_responses)<200 and measurement_parameters.freqs_per_v!= -1:
+            outfile = self._get_outfile_name(
+            self.out_directory, "frequency_responses_v-range"
+            )
+            plotlib.plot_frequency_responses_over_velocity(
+                frequency_responses, outfile, measurement_parameters, gcmd
+            )
+        else:
+            outfile = self._get_outfile_name(
+            self.out_directory, "peak_frequencies_cmap"
+            )
+            plotlib.plot_peak_frequencies_cmap(
+            peak_frequencies,
+            outfile,
+            outfilelog,
+            measurement_parameters,
+            gcmd,
+            known_causes,
+        )
 
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:

@@ -100,7 +100,7 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
         fancybox=True,
         shadow=False,
         ncol=1,
-        title=f"measurement data with accel {measurement_parameters.accel} mm/s^2",
+        title=f"measurement data with \n accel {measurement_parameters.accel} mm/s^2",
     )
     fig.tight_layout(pad=0.9)
 
@@ -172,7 +172,7 @@ def plot_peak_frequencies(
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
     ax.minorticks_on()
-    ax.yaxis.grid(False)
+    ax.yaxis.grid(False, which='both')
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, f_max = {measurement_parameters.f_max} Hz",
         wrap=True,
