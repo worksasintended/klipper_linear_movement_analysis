@@ -9,32 +9,37 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def plot_frequencies(
-    data,
-    outfile,
-    measurement_parameters,
-    gcmd,
-    known_causes
-):
+def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.4))
     fig.suptitle(
         f"vibration profile at constant velocity {measurement_parameters.velocity} mm/s along {measurement_parameters.axis} axis",
         wrap=True,
     )
+    ax.set_title(
+        rf"measured with accel = {measurement_parameters.accel} $mm/s^2$",
+        fontsize="small",
+        c="gray",
+    )
     plt.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
     ax.set_xlim(data[0][0], measurement_parameters.f_max)
     for length, name, color in known_causes:
-        ax.axvline(x=measurement_parameters.velocity/length, c=color, label=name, lw=1, ls='--')
+        ax.axvline(
+            x=measurement_parameters.velocity / length,
+            c=color,
+            label=name,
+            lw=1,
+            ls="--",
+        )
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
     ax.plot(data[0], data[3], label="z")
     ax.grid()
     ax.minorticks_on()
-    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    ax.grid(which="major", linestyle="-", linewidth="0.5", color="black")
+    ax.grid(which="minor", linestyle=":", linewidth="0.5", color="black")
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.13),
@@ -87,10 +92,16 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     )
     ax.grid()
     ax.minorticks_on()
-    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    ax.grid(which="major", linestyle="-", linewidth="0.5", color="black")
+    ax.grid(which="minor", linestyle=":", linewidth="0.5", color="black")
 
-    ax.legend(loc="best", fancybox=True, shadow=False, ncol=1, title="measurement data with accel {measurement_parameters.accel} mm/s^2")
+    ax.legend(
+        loc="best",
+        fancybox=True,
+        shadow=False,
+        ncol=1,
+        title=f"measurement data with accel {measurement_parameters.accel} mm/s^2",
+    )
     fig.tight_layout(pad=0.9)
 
     fig.savefig(outfile)
@@ -104,7 +115,7 @@ def plot_peak_frequencies(
     outfilelog,
     measurement_parameters,
     gcmd,
-    known_causes, 
+    known_causes,
 ):
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.7))
@@ -116,7 +127,7 @@ def plot_peak_frequencies(
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
     peak_height_to_size = 110 * normalized_peak_heights
     for length, name, color in known_causes:
-        ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
+        ax.plot(velocities, velocities / length, c=color, label=name, lw=1)
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.10),
@@ -125,19 +136,25 @@ def plot_peak_frequencies(
         ncol=3,
     )
     scatter = ax.scatter(
-            velocities, peak_freqs, c='black', s=peak_height_to_size, marker="o", cmap='magma'
-        )
+        velocities,
+        peak_freqs,
+        c="black",
+        s=peak_height_to_size,
+        marker="o",
+        cmap="magma",
+    )
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
+    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
     ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
     ax.minorticks_on()
-    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    ax.grid(which="major", linestyle="-", linewidth="0.5", color="black")
+    ax.grid(which="minor", linestyle=":", linewidth="0.5", color="black")
     fig.tight_layout(pad=0.9)
     plt.savefig(outfile, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfile}")
@@ -154,9 +171,10 @@ def plot_peak_frequencies(
     )
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
-    ax.minorticks_off()
+    ax.yaxis.grid(False)
+    ax.minorticks_on()
     fig.suptitle(
-        fr"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, $f_{max}$ = {measurement_parameters.f_max} Hz",
+        f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, f_max = {measurement_parameters.f_max} Hz",
         wrap=True,
     )
     ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
@@ -164,7 +182,6 @@ def plot_peak_frequencies(
     plt.savefig(outfilelog, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfilelog}")
     plt.close("all")
-
 
 
 def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters, gcmd):
@@ -176,7 +193,7 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     fig.suptitle(
         f"vibration spectrum at constant velocity along {measurement_parameters.axis} axis "
     )
-
+    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
     # fix visuals with simple heuristic
     line_width = 1 if len(data) < 25 else np.exp(-(len(data)) / 40) + 0.2
@@ -185,7 +202,7 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
         y = velocity_sample[2]
         z = velocity_sample[0]
         ax.plot(x, y, zs=z, zdir="y", c="black", lw=line_width)
-    ax.set_xlabel("f in Hz")
+    ax.set_xlabel("frequency in Hz")
     ax.set_zlabel("relative response")
     ax.set_ylabel("velocity")
     fig.tight_layout(pad=0.9)
@@ -193,13 +210,14 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")
 
+
 def plot_peak_frequencies_cmap(
     data,
     outfile,
     outfilelog,
     measurement_parameters,
     gcmd,
-    known_causes, 
+    known_causes,
 ):
     plt.ioff()
     fig, ax = plt.subplots(figsize=(6.4, 5.7))
@@ -208,25 +226,31 @@ def plot_peak_frequencies_cmap(
     peak_ffts = np.concatenate(peak_ffts)
     peak_freqs = np.concatenate(peak_freqs)
     peak_ffts = peak_ffts ** (0.8)
-    min_fft = np.amin(peak_ffts) 
+    min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-    peak_height_to_size =  90 * normalized_peak_heights**2
+    peak_height_to_size = 90 * normalized_peak_heights**2
     scatter = ax.scatter(
-            velocities, peak_freqs, c=normalized_peak_heights, s=peak_height_to_size, marker="o", cmap='magma'
-        )
+        velocities,
+        peak_freqs,
+        c=normalized_peak_heights,
+        s=peak_height_to_size,
+        marker="o",
+        cmap="magma",
+    )
     cbar = fig.colorbar(scatter)
-    cbar.set_label('normalized response')
+    cbar.set_label("normalized response")
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
+    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
     ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
     ax.minorticks_on()
-    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
-    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    ax.grid(which="major", linestyle="-", linewidth="0.5", color="black")
+    ax.grid(which="minor", linestyle=":", linewidth="0.5", color="black")
     fig.tight_layout(pad=0.9)
     plt.savefig(outfile, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfile}")
