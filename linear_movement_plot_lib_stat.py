@@ -128,12 +128,13 @@ def plot_peak_frequencies(
             ncol=3,
         )
     else:
-        peak_ffts = peak_ffts ** (0.8) 
+        peak_ffts = peak_ffts ** (0.8)
+        min_fft = np.amin(peak_ffts) 
         normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
         peak_height_to_size =  90 * normalized_peak_heights**2
         c = normalized_peak_heights
     scatter = ax.scatter(
-            velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o"
+            velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o", cmap='magma'
         )
     fig.suptitle(
         f"Vibration peak frequencies for axis {measurement_parameters.axis} with accel {measurement_parameters.accel} mm/s^2",
