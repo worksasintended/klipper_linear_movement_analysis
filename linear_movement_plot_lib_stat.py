@@ -114,27 +114,18 @@ def plot_peak_frequencies(
     peak_freqs = np.concatenate(peak_freqs)
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-
-    if len(data)<200 and measurement_parameters.freqs_per_v!= -1:
-        peak_height_to_size = 110 * normalized_peak_heights
-        c = 'black'
-        for length, name, color in known_causes:
-            ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
-        ax.legend(
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.10),
-            fancybox=True,
-            shadow=False,
-            ncol=3,
-        )
-    else:
-        peak_ffts = peak_ffts ** (0.8)
-        min_fft = np.amin(peak_ffts) 
-        normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
-        peak_height_to_size =  90 * normalized_peak_heights**2
-        c = normalized_peak_heights
+    peak_height_to_size = 110 * normalized_peak_heights
+    for length, name, color in known_causes:
+        ax.plot(velocities, velocities/length, c=color, label=name, lw=1)
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.10),
+        fancybox=True,
+        shadow=False,
+        ncol=3,
+    )
     scatter = ax.scatter(
-            velocities, peak_freqs, c=c, s=peak_height_to_size, marker="o", cmap='magma'
+            velocities, peak_freqs, c='black', s=peak_height_to_size, marker="o", cmap='magma'
         )
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
@@ -150,30 +141,30 @@ def plot_peak_frequencies(
     fig.tight_layout(pad=0.9)
     plt.savefig(outfile, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfile}")
-    if len(data)<200 and measurement_parameters.freqs_per_v!= -1:
-        ax.set_yscale("log")
-        plt.axhline(
-            y=measurement_parameters.f_max, color="black", linestyle="--", label="f_max"
-        )
-        ax.legend(
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.13),
-            fancybox=True,
-            shadow=False,
-            ncol=3,
-        )
-        ax.set_autoscaley_on(True)
-        plt.autoscale(True)
-        ax.minorticks_off()
-        fig.suptitle(
-            fr"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, $f_{max}$ = {measurement_parameters.f_max} Hz",
-            wrap=True,
-        )
-        ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
-        fig.tight_layout(pad=0.9)
-        plt.savefig(outfilelog, bbox_inches="tight")
-        gcmd.respond_info(f"output written to {outfilelog}")
+    ax.set_yscale("log")
+    plt.axhline(
+        y=measurement_parameters.f_max, color="black", linestyle="--", label="f_max"
+    )
+    ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.13),
+        fancybox=True,
+        shadow=False,
+        ncol=3,
+    )
+    ax.set_autoscaley_on(True)
+    plt.autoscale(True)
+    ax.minorticks_off()
+    fig.suptitle(
+        fr"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, $f_{max}$ = {measurement_parameters.f_max} Hz",
+        wrap=True,
+    )
+    ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
+    fig.tight_layout(pad=0.9)
+    plt.savefig(outfilelog, bbox_inches="tight")
+    gcmd.respond_info(f"output written to {outfilelog}")
     plt.close("all")
+
 
 
 def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters, gcmd):
@@ -199,5 +190,44 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     ax.set_ylabel("velocity")
     fig.tight_layout(pad=0.9)
     plt.savefig(outfile)
+    gcmd.respond_info(f"output written to {outfile}")
+    plt.close("all")
+
+def plot_peak_frequencies_cmap(
+    data,
+    outfile,
+    outfilelog,
+    measurement_parameters,
+    gcmd,
+    known_causes, 
+):
+    plt.ioff()
+    fig, ax = plt.subplots(figsize=(6.4, 5.7))
+    velocities, peak_freqs, peak_ffts = zip(*data)
+    velocities = np.concatenate(velocities)
+    peak_ffts = np.concatenate(peak_ffts)
+    peak_freqs = np.concatenate(peak_freqs)
+    peak_ffts = peak_ffts ** (0.8)
+    min_fft = np.amin(peak_ffts) 
+    normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
+    peak_height_to_size =  90 * normalized_peak_heights**2
+    scatter = ax.scatter(
+            velocities, peak_freqs, c=normalized_peak_heights, s=peak_height_to_size, marker="o", cmap='magma'
+        )
+    cbar = fig.colorbar(scatter)
+    cbar.set_label('normalized response')
+    fig.suptitle(
+        f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
+        wrap=True,
+    )
+    ax.set_xlabel("velocity in mm/s")
+    ax.set_ylabel("peak frequency in Hz")
+    ax.set_ylim(0, measurement_parameters.f_max)
+    ax.set_xlim(measurement_parameters.v_min, measurement_parameters.v_max)
+    ax.minorticks_on()
+    ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black')
+    fig.tight_layout(pad=0.9)
+    plt.savefig(outfile, bbox_inches="tight")
     gcmd.respond_info(f"output written to {outfile}")
     plt.close("all")

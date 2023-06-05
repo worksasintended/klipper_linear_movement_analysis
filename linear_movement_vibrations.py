@@ -284,11 +284,25 @@ class LinearMovementVibrationsTest:
             gcmd,
             known_causes,
         )
-        outfile = self._get_outfile_name(
+        
+        if len(frequency_responses)<200 and measurement_parameters.freqs_per_v!= -1:
+            outfile = self._get_outfile_name(
             self.out_directory, "frequency_responses_v-range"
-        )
-        plotlib.plot_frequency_responses_over_velocity(
-            frequency_responses, outfile, measurement_parameters, gcmd
+            )
+            plotlib.plot_frequency_responses_over_velocity(
+                frequency_responses, outfile, measurement_parameters, gcmd
+            )
+        else:
+            outfile = self._get_outfile_name(
+            self.out_directory, "peak_frequencies_cmap"
+            )
+            plotlib.plot_peak_frequencies_cmap(
+            peak_frequencies,
+            outfile,
+            outfilelog,
+            measurement_parameters,
+            gcmd,
+            known_causes,
         )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
