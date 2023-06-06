@@ -130,6 +130,8 @@ def plot_peak_frequencies(
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
     peak_height_to_size = 100 * normalized_peak_heights
+    if measurement_parameters.freqs_per_v==-1 and len(data)>100:
+        peak_height_to_size = 100 * normalized_peak_heights**2
     outline=patheffects.withStroke(linewidth=1.2, foreground='black')
     for length, name, color in known_causes:
         ax.plot(velocities, velocities / length, c=color, label=name, lw=1, path_effects=[outline])
