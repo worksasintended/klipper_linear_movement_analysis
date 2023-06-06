@@ -278,7 +278,7 @@ class LinearMovementVibrationsTest:
         self._call_plotlib(
             gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses
         )
-        
+
         self._exit_gcommand()
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
@@ -358,7 +358,9 @@ class LinearMovementVibrationsTest:
         for adxl_axis_attached, accel_chip_client in adxl_handler:
             accel_chip_client.finish_measurements()
             if not accel_chip_client.has_valid_samples():
-                self._exit_gcommand(GcommandExitType("error"),"No data received from accelerometer")
+                self._exit_gcommand(
+                    GcommandExitType("error"), "No data received from accelerometer"
+                )
             else:
                 measurement_data = np.asarray(accel_chip_client.get_samples())
                 accel_chip_client.finish_measurements()
@@ -385,7 +387,6 @@ class LinearMovementVibrationsTest:
 
         if state.value == "error":
             raise self.gcode.error(message)
-
 
     def _call_plotlib(
         self,
@@ -484,9 +485,8 @@ class LinearMovementVibrationsTest:
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", fname, "")
-            self._write_data_outfile(
-                out_directory, gcmd, outfile, frequency_response
-            )
+            self._write_data_outfile(out_directory, gcmd, outfile, frequency_response)
+
     def _get_accel(self, gcmd, max_accel):
         # define max_accel from toolhead and check if user settings exceed max accel
         accel = gcmd.get_int("ACCEL", max_accel)
@@ -522,57 +522,33 @@ class LinearMovementVibrationsTest:
             limits,
             freqs_per_v,
         )
-    def _strip_to_linear_velocity_share(self,velocity, data, motion_report, gcmd):
+
+    def _strip_to_linear_velocity_share(self, velocity, data, motion_report, gcmd):
         # find time stamp of linear movement start
         velocity_not_reached = True
         for i in range(len(data)):
             if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    == velocity
+                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                == velocity
             ):
                 data = data[i:]
                 velocity_not_reached = False
                 break
         for i in range(len(data)):
             if (
-                    motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
-                    < velocity
+                motion_report.trapqs["toolhead"].get_trapq_position(data[i, 0])[1]
+                < velocity
             ):
                 data = data[: i - 1]
                 break
         if velocity_not_reached or len(data) < 300:
-            message = "Target velocity not reached for a sufficient amount of time. Either decrease target velocity, " \
-                      "increase acceleration or increase test area "
+            message = (
+                "Target velocity not reached for a sufficient amount of time. Either decrease target velocity, "
+                "increase acceleration or increase test area "
+            )
             self._exit_gcommand(GcommandExitType("error"), message)
 
         return data
-
-    def _known_causes(self, measurement_parameters, d):
-        """TODO: Explanation of the length factors"""
-        known_causes = [
-            (2, "2gt belt pitch", "#EC2029"),
-            (1.21, "2gt belt teeth width", "#FA7909"),
-            (0.8, "2gt belt valley width", "#ECD707"),
-            (0.4, "2gt belt valley flat width", "#0F9944"),
-        ]
-
-        rotation_distance, steps_per_full_rotation = self._get_step_distance(
-            measurement_parameters.axis, self.stepper_configs
-        )
-        if d is not None:
-            known_causes.append((np.pi * d, "idler rotation", "#0356C2"))
-
-        if rotation_distance is not None:
-            known_causes.append((rotation_distance, "pulley rotation", "grey"))
-            if steps_per_full_rotation is not None:
-                known_causes.append(
-                    (
-                        rotation_distance / steps_per_full_rotation,
-                        "motor step",
-                        "#4F058C",
-                    )
-                )
-        return known_causes
 
     def _known_causes(self, measurement_parameters, d):
         """TODO: Explanation of the length factors"""
@@ -633,9 +609,6 @@ class LinearMovementVibrationsTest:
         elif axis.lower() in "y":
             rotation_dist, step_distance = parse_full_step_distance(config[1])
         return rotation_dist, step_distance
-
-
-
 
     @staticmethod
     def _map_r3_response_to_single_axis(frequency_response):
@@ -715,8 +688,7 @@ class LinearMovementVibrationsTest:
             self._exit_gcommand(GcommandExitType("error"), message)
         return velocity
 
-
-    def _get_axis(self,gcmd):
+    def _get_axis(self, gcmd):
         axis = gcmd.get("AXIS", None)
         axis = (axis, "x")[axis is None]
         if axis.lower() not in ["x", "y", "a", "b"]:
