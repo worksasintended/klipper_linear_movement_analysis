@@ -18,7 +18,7 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
         wrap=True,
     )
     ax.set_title(
-        rf"measured with accel = {measurement_parameters.accel} $mm/s^2$",
+        rf"accel = {measurement_parameters.accel} $mm/s^2$",
         fontsize="small",
         c="gray",
     )
@@ -26,7 +26,7 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
     ax.set_xlabel("frequency in Hz")
     ax.set_ylabel("response")
     ax.set_xlim(data[0][0], measurement_parameters.f_max)
-    outline=patheffects.withStroke(linewidth=1.2, foreground='black')
+    outline = patheffects.withStroke(linewidth=1.2, foreground="black")
 
     for length, name, color in known_causes:
         ax.axvline(
@@ -35,7 +35,7 @@ def plot_frequencies(data, outfile, measurement_parameters, gcmd, known_causes):
             label=name,
             lw=1,
             ls="--",
-            path_effects=[outline]
+            path_effects=[outline],
         )
     ax.plot(data[0], data[1], label="x")
     ax.plot(data[0], data[2], label="y")
@@ -130,11 +130,18 @@ def plot_peak_frequencies(
     min_fft = np.amin(peak_ffts)
     normalized_peak_heights = (peak_ffts - min_fft) / (np.amax(peak_ffts) - min_fft)
     peak_height_to_size = 100 * normalized_peak_heights
-    if measurement_parameters.freqs_per_v==-1 and len(data)>100:
-        peak_height_to_size = 100 * normalized_peak_heights**2
-    outline=patheffects.withStroke(linewidth=1.2, foreground='black')
+    if measurement_parameters.freqs_per_v == -1 and len(data) > 200:
+        peak_height_to_size = 100 * normalized_peak_heights**1.5
+    outline = patheffects.withStroke(linewidth=1.2, foreground="black")
     for length, name, color in known_causes:
-        ax.plot(velocities, velocities / length, c=color, label=name, lw=1, path_effects=[outline])
+        ax.plot(
+            velocities,
+            velocities / length,
+            c=color,
+            label=name,
+            lw=1,
+            path_effects=[outline],
+        )
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.10),
@@ -154,7 +161,9 @@ def plot_peak_frequencies(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
-    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
+    ax.set_title(
+        rf"accel = {measurement_parameters.accel} $mm/s^2$", fontsize="small", c="gray"
+    )
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)
@@ -179,7 +188,7 @@ def plot_peak_frequencies(
     ax.set_autoscaley_on(True)
     plt.autoscale(True)
     ax.minorticks_on()
-    ax.yaxis.grid(False, which='both')
+    ax.yaxis.grid(False, which="both")
     fig.suptitle(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis, f_max = {measurement_parameters.f_max} Hz",
         wrap=True,
@@ -200,7 +209,9 @@ def plot_frequency_responses_over_velocity(data, outfile, measurement_parameters
     fig.suptitle(
         f"vibration spectrum at constant velocity along {measurement_parameters.axis} axis "
     )
-    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
+    ax.set_title(
+        rf"accel = {measurement_parameters.accel} $mm/s^2$", fontsize="small", c="gray"
+    )
     ax.ticklabel_format(style="sci", axis="z", scilimits=(0, 0))
     # fix visuals with simple heuristic
     line_width = 1 if len(data) < 25 else np.exp(-(len(data)) / 40) + 0.2
@@ -250,7 +261,9 @@ def plot_peak_frequencies_cmap(
         f"vibration peak frequencies at constant velocity along {measurement_parameters.axis} axis",
         wrap=True,
     )
-    ax.set_title(fr'measured with accel = {measurement_parameters.accel} $mm/s^2$', fontsize='small', c='gray')
+    ax.set_title(
+        rf"accel = {measurement_parameters.accel} $mm/s^2$", fontsize="small", c="gray"
+    )
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("peak frequency in Hz")
     ax.set_ylim(0, measurement_parameters.f_max)

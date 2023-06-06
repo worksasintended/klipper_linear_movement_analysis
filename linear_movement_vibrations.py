@@ -268,7 +268,9 @@ class LinearMovementVibrationsTest:
             frequency_responses, gcmd, self.out_directory, "frequency_responses"
         )
 
-        self._call_plotlib(gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses)
+        self._call_plotlib(
+            gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses
+        )
 
     def cmd_MEASURE_LINEAR_VIBRATIONS(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
@@ -296,7 +298,9 @@ class LinearMovementVibrationsTest:
             ),
         )
 
-        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
+        known_causes = self._known_causes(
+            measurement_parameters, d=gcmd.get_float("D_IDLER", None)
+        )
         plotlib.plot_frequencies(
             frequency_response,
             outfile,
@@ -357,16 +361,25 @@ class LinearMovementVibrationsTest:
             (chip_axis, self.printer.lookup_object(chip_name))
             for chip_axis, chip_name in self.accel_chip_names
         ]
-    
-    def _call_plotlib(self, gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses):
+
+    def _call_plotlib(
+        self,
+        gcmd,
+        measurement_parameters,
+        powers,
+        peak_frequencies,
+        frequency_responses,
+    ):
         outfile = self._get_outfile_name(self.out_directory, "relative_power")
         plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
         outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
         outfilelog = self._get_outfile_name(
             self.out_directory, "peak_frequencies_logscale"
         )
-        known_causes = self._known_causes(measurement_parameters, d=gcmd.get_float("D_IDLER", None))
-        
+        known_causes = self._known_causes(
+            measurement_parameters, d=gcmd.get_float("D_IDLER", None)
+        )
+
         plotlib.plot_peak_frequencies(
             peak_frequencies,
             outfile,
@@ -375,26 +388,26 @@ class LinearMovementVibrationsTest:
             gcmd,
             known_causes,
         )
-        
-        if len(frequency_responses)<200 and measurement_parameters.freqs_per_v!= -1:
+
+        if len(frequency_responses) < 200 and measurement_parameters.freqs_per_v != -1:
             outfile = self._get_outfile_name(
-            self.out_directory, "frequency_responses_v-range"
+                self.out_directory, "frequency_responses_v-range"
             )
             plotlib.plot_frequency_responses_over_velocity(
                 frequency_responses, outfile, measurement_parameters, gcmd
             )
         else:
             outfile = self._get_outfile_name(
-            self.out_directory, "peak_frequencies_cmap"
+                self.out_directory, "peak_frequencies_cmap"
             )
             plotlib.plot_peak_frequencies_cmap(
-            peak_frequencies,
-            outfile,
-            outfilelog,
-            measurement_parameters,
-            gcmd,
-            known_causes,
-        )
+                peak_frequencies,
+                outfile,
+                outfilelog,
+                measurement_parameters,
+                gcmd,
+                known_causes,
+            )
 
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
@@ -438,23 +451,31 @@ class LinearMovementVibrationsTest:
             freqs_per_v,
         )
 
-    
     def _known_causes(self, measurement_parameters, d):
-        """TODO: Explanation of the length factors
-        """
-        known_causes = [(2,"2gt belt pitch", '#EC2029'), (1.21, "2gt belt teeth width", '#FA7909'),
-         (0.8, "2gt belt valley width", '#ECD707'), (.4, "2gt belt valley flat width", '#0F9944')]
-        
+        """TODO: Explanation of the length factors"""
+        known_causes = [
+            (2, "2gt belt pitch", "#EC2029"),
+            (1.21, "2gt belt teeth width", "#FA7909"),
+            (0.8, "2gt belt valley width", "#ECD707"),
+            (0.4, "2gt belt valley flat width", "#0F9944"),
+        ]
+
         rotation_distance, steps_per_full_rotation = self._get_step_distance(
             measurement_parameters.axis, self.stepper_configs
         )
         if d is not None:
-            known_causes.append((np.pi * d,"idler rotation", '#0356C2'))
+            known_causes.append((np.pi * d, "idler rotation", "#0356C2"))
 
         if rotation_distance is not None:
-            known_causes.append((rotation_distance,"pulley rotation", 'grey'))
+            known_causes.append((rotation_distance, "pulley rotation", "grey"))
             if steps_per_full_rotation is not None:
-                known_causes.append((rotation_distance/steps_per_full_rotation,"motor step",'#4F058C'))
+                known_causes.append(
+                    (
+                        rotation_distance / steps_per_full_rotation,
+                        "motor step",
+                        "#4F058C",
+                    )
+                )
         return known_causes
 
     @staticmethod
