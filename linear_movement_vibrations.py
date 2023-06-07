@@ -415,16 +415,7 @@ class LinearMovementVibrationsTest:
             known_causes,
         )
 
-        if len(peak_frequencies) < 200 and measurement_parameters.freqs_per_v != -1:
-            outfile = self._get_outfile_name(
-                self.out_directory, "frequency_responses_v-range"
-            )
-            plotlib.plot_frequency_responses_over_velocity(
-                frequency_responses, outfile, measurement_parameters, gcmd
-            )
-        else:
-            gcmd.respond_info(f"len peak_frequencies {len(peak_frequencies)}")
-
+        if len(peak_frequencies) > 200 and measurement_parameters.freqs_per_v == -1:
             outfile = self._get_outfile_name(
                 self.out_directory, "peak_frequencies_cmap"
             )
@@ -436,7 +427,14 @@ class LinearMovementVibrationsTest:
                 gcmd,
                 known_causes,
             )
-
+        else:
+            outfile = self._get_outfile_name(
+                self.out_directory, "frequency_responses_v-range"
+            )
+            plotlib.plot_frequency_responses_over_velocity(
+                frequency_responses, outfile, measurement_parameters, gcmd
+            )
+            
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", fname, "")
