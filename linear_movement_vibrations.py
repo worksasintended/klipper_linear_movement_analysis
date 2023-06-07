@@ -451,9 +451,10 @@ class LinearMovementVibrationsTest:
         return accel
 
     def _get_measurement_parameters(self, gcmd):
+        vlim = self.toolhead.max_velocity
         axis = self._get_axis(gcmd)
-        v_min, v_max, v_step = self._get_velocity_range(gcmd)
-        velocity = self._get_velocity(gcmd)
+        v_min, v_max, v_step = self._get_velocity_range(gcmd, vlim)
+        velocity = self._get_velocity(gcmd, vlim)
         accel = self._get_accel(gcmd, self.max_accel)
         f_max = gcmd.get_int("FMAX", 2 * v_max)
         f_min = gcmd.get_int("FMIN", 5)
@@ -623,21 +624,32 @@ class LinearMovementVibrationsTest:
         p2_y = gcmd.get_int("ENDY", p2_y)
         return [p1_x, p1_y], [p2_x, p2_y]
 
-    @staticmethod
-    def _get_velocity_range(gcmd):
-        vmin = gcmd.get_int("VMIN", None)
-        vmin = (vmin, 50)[vmin is None]
-        vmax = gcmd.get_int("VMAX", None)
-        vmax = (vmax, 300)[vmax is None]
-        vstep = gcmd.get_int("STEP", None)
-        vstep = (vstep, 10)[vstep is None]
+    def _get_velocity_range(self, gcmd, vlim):
+        vmin = gcmd.get_int("VMIN", 20)
+        vmax = gcmd.get_int("VMAX", vlim)    
+        vstep = gcmd.get_int("STEP", 5)
+        if vmin >= vlim:
+            message = f"Initial velocity '{vmin}' mm/s exceeds printer limit of '{vlim}' mm/s"
+            self._exit_gcommand(GcommandExitType("error"), message)
+        elif vmin < 0:
+            message = f"Initial velocity '{vmin}' mm/s must be positive"
+            self._exit_gcommand(GcommandExitType("error"), message)
+        
+        if vmax > vlim:
+            message = f"End velocity '{vmax}' mm/s exceeds printer limit of '{vlim}' mm/s"
+            self._exit_gcommand(GcommandExitType("error"), message)
+        elif vmax < 0:
+            message = f"End velocity '{vmax}' mm/s must be positive"
+            self._exit_gcommand(GcommandExitType("error"), message)
         return vmin, vmax, vstep
 
-    def _get_velocity(self, gcmd):
-        velocity = gcmd.get_int("VELOCITY", None)
-        velocity = (velocity, 150)[velocity is None]
-        if self.toolhead.max_velocity < velocity:
-            message = f"Requested velocity '{velocity}' succeeds printer limits"
+    def _get_velocity(self, gcmd, vlim):
+        velocity = gcmd.get_int("VELOCITY", 150)
+        if vlim < velocity :
+            message = f"Requested velocity '{velocity}' exceeds printer limits"
+            self._exit_gcommand(GcommandExitType("error"), message)
+        elif velocity < 0:
+            message = f"Starting velocity '{velocity}' mm/s must be positive"
             self._exit_gcommand(GcommandExitType("error"), message)
         return velocity
 
