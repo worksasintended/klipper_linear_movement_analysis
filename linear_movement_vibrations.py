@@ -416,53 +416,7 @@ class LinearMovementVibrationsTest:
         )
 
         if len(peak_frequencies) < 200 and measurement_parameters.freqs_per_v != -1:
-            outfile = self._get_outfile_name(
-                self.out_directory, "frequency_responses_v-range"
-            )
-            plotlib.plot_frequency_responses_over_velocity(
-                frequency_responses, outfile, measurement_parameters, gcmd
-            )
-        else:
-            outfile = self._get_outfile_name(
-                self.out_directory, "peak_frequencies_cmap"
-            )
-            plotlib.plot_peak_frequencies_cmap(
-                peak_frequencies,
-                outfile,
-                outfilelog,
-                measurement_parameters,
-                gcmd,
-                known_causes,
-            )
-
-    def _call_plotlib(
-        self,
-        gcmd,
-        measurement_parameters,
-        powers,
-        peak_frequencies,
-        frequency_responses,
-    ):
-        outfile = self._get_outfile_name(self.out_directory, "relative_power")
-        plotlib.plot_relative_power(powers, outfile, measurement_parameters, gcmd)
-        outfile = self._get_outfile_name(self.out_directory, "peak_frequencies")
-        outfilelog = self._get_outfile_name(
-            self.out_directory, "peak_frequencies_logscale"
-        )
-        known_causes = self._known_causes(
-            measurement_parameters, d=gcmd.get_float("D_IDLER", None)
-        )
-
-        plotlib.plot_peak_frequencies(
-            peak_frequencies,
-            outfile,
-            outfilelog,
-            measurement_parameters,
-            gcmd,
-            known_causes,
-        )
-
-        if len(peak_frequencies) < 200 and measurement_parameters.freqs_per_v != -1:
+            gcmd.respond_info(f"len peak_frequencies {len(peak_frequencies)}")
             outfile = self._get_outfile_name(
                 self.out_directory, "frequency_responses_v-range"
             )
