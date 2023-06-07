@@ -416,7 +416,6 @@ class LinearMovementVibrationsTest:
         )
 
         if len(peak_frequencies) < 200 and measurement_parameters.freqs_per_v != -1:
-            gcmd.respond_info(f"len peak_frequencies {len(peak_frequencies)}")
             outfile = self._get_outfile_name(
                 self.out_directory, "frequency_responses_v-range"
             )
@@ -424,6 +423,8 @@ class LinearMovementVibrationsTest:
                 frequency_responses, outfile, measurement_parameters, gcmd
             )
         else:
+            gcmd.respond_info(f"len peak_frequencies {len(peak_frequencies)}")
+
             outfile = self._get_outfile_name(
                 self.out_directory, "peak_frequencies_cmap"
             )
