@@ -642,7 +642,11 @@ class LinearMovementVibrationsTest:
         elif vmax < 0:
             message = f"End velocity '{vmax}' mm/s must be positive"
             self._exit_gcommand(GcommandExitType("error"), message)
-        return vmin, vmax, vstep
+
+        if vmax < vmin and vstep>0:
+            return vmax, vmin, vstep
+        else:
+            return vmin, vmax, vstep
 
     def _get_velocity(self, gcmd, vlim):
         velocity = gcmd.get_int("VELOCITY", 150)
@@ -650,7 +654,7 @@ class LinearMovementVibrationsTest:
             message = f"Requested velocity '{velocity}' exceeds printer limits"
             self._exit_gcommand(GcommandExitType("error"), message)
         elif velocity < 0:
-            message = f"Starting velocity '{velocity}' mm/s must be positive"
+            message = f"Requested velocity '{velocity}' mm/s must be positive"
             self._exit_gcommand(GcommandExitType("error"), message)
         return velocity
 
