@@ -451,7 +451,8 @@ class LinearMovementVibrationsTest:
         return accel
 
     def _get_measurement_parameters(self, gcmd):
-        vlim = self.toolhead.max_velocity
+        # make sure toolhead max velocity is integer
+        vlim = int(self.toolhead.max_velocity)
         axis = self._get_axis(gcmd)
         v_min, v_max, v_step = self._get_velocity_range(gcmd, vlim)
         velocity = self._get_velocity(gcmd, vlim)
