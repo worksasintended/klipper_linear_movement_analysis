@@ -434,7 +434,7 @@ class LinearMovementVibrationsTest:
             plotlib.plot_frequency_responses_over_velocity(
                 frequency_responses, outfile, measurement_parameters, gcmd
             )
-            
+
     def _export_fft_data(self, frequency_response, gcmd, out_directory, fname):
         if gcmd.get_int("EXPORT_FFTDATA", 0) == 1:
             outfile = self._get_outfile_name("", fname, "")
