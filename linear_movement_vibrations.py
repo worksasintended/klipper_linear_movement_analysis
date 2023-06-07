@@ -275,7 +275,7 @@ class LinearMovementVibrationsTest:
             frequency_responses, gcmd, self.out_directory, "frequency_responses"
         )
 
-        self._call_plotlib(
+        self._create_range_plots(
             gcmd, measurement_parameters, powers, peak_frequencies, frequency_responses
         )
 
@@ -388,7 +388,7 @@ class LinearMovementVibrationsTest:
         if state.value == "error":
             raise self.gcode.error(message)
 
-    def _call_plotlib(
+    def _create_range_plots(
         self,
         gcmd,
         measurement_parameters,
