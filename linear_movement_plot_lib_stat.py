@@ -76,10 +76,10 @@ def plot_relative_power(data, outfile, measurement_parameters, gcmd):
     )
     ax.ticklabel_format(style="sci", axis="y", scilimits=(0, 0))
     ax.set_title(
-            rf"accel = {measurement_parameters.accel} $mm/s^2$",
-            fontsize="small",
-            c="gray",
-        )
+        rf"accel = {measurement_parameters.accel} $mm/s^2$",
+        fontsize="small",
+        c="gray",
+    )
     ax.set_xlabel("velocity in mm/s")
     ax.set_ylabel("relative power")
     # heuristics for  visibility
