@@ -415,7 +415,7 @@ class LinearMovementVibrationsTest:
             known_causes,
         )
 
-        if len(frequency_responses) < 200 and measurement_parameters.freqs_per_v != -1:
+        if len(peak_frequencies) < 200 and measurement_parameters.freqs_per_v != -1:
             outfile = self._get_outfile_name(
                 self.out_directory, "frequency_responses_v-range"
             )
