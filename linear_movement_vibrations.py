@@ -645,7 +645,7 @@ class LinearMovementVibrationsTest:
 
         if vmax - vmin >= 0 and vstep >= 0:
             return vmin, vmax, vstep
-        message = f"Check input "
+        message = "Input velocities do not match VMAX > VMIN and STEP > 0"
         self._exit_gcommand(GcommandExitType("error"), message)
 
     def _get_velocity(self, gcmd, vlim):
