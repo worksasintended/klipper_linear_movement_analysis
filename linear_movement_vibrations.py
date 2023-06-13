@@ -628,7 +628,7 @@ class LinearMovementVibrationsTest:
     def _get_velocity_range(self, gcmd, vlim):
         vmin = gcmd.get_int("VMIN", 20)
         vmax = gcmd.get_int("VMAX", vlim)
-        vstep = gcmd.get_int("STEP", 5)
+        vstep = gcmd.get_float("STEP", 5)
 
         check_input = [(vmax, 'End'), (vmin, 'Initial')]
         for value, name in check_input:
