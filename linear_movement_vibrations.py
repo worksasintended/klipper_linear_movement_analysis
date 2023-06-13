@@ -212,7 +212,7 @@ class LinearMovementVibrationsTest:
     def cmd_MEASURE_LINEAR_VIBRATIONS_RANGE(self, gcmd):
         measurement_parameters = self._get_measurement_parameters(gcmd)
         motion_report = self.printer.lookup_object("motion_report")
-        velocity_range = range(
+        velocity_range = np.arange(
             measurement_parameters.v_min,
             measurement_parameters.v_max + 1,
             measurement_parameters.v_step,
