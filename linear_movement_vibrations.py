@@ -639,11 +639,11 @@ class LinearMovementVibrationsTest:
                 message = f"{name} velocity '{value}' mm/s must be positive"
                 self._exit_gcommand(GcommandExitType("error"), message)
         
-        if vmax - vmin < 0 and vstep < 0:
+        if vmax - vmin < 0 or vstep < 0:
             message = "Input velocities demand VMAX > VMIN and STEP > 0"
             self._exit_gcommand(GcommandExitType("error"), message)
-
-        return vmin, vmax, vstep
+        else:
+            return vmin, vmax, vstep
 
     def _get_velocity(self, gcmd, vlim):
         velocity = gcmd.get_int("VELOCITY", 150)
