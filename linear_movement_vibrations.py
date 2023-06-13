@@ -633,14 +633,14 @@ class LinearMovementVibrationsTest:
         check_input = [(vmax, 'End'), (vmin, 'Initial')]
         for value, name in check_input:
             if value > vlim:
-                message = f"{name} velocity '{vmin}' mm/s exceeds printer limit of '{vlim}' mm/s"
+                message = f"{name} velocity '{value}' mm/s exceeds printer limit of '{vlim}' mm/s"
                 self._exit_gcommand(GcommandExitType("error"), message)    
             elif value < 0:
-                message = f"{name} velocity '{vmin}' mm/s must be positive"
+                message = f"{name} velocity '{value}' mm/s must be positive"
                 self._exit_gcommand(GcommandExitType("error"), message)
         
         if vmax - vmin < 0 and vstep < 0:
-            message = "Input velocities do not match VMAX > VMIN and STEP > 0"
+            message = "Input velocities demand VMAX > VMIN and STEP > 0"
             self._exit_gcommand(GcommandExitType("error"), message)
 
         return vmin, vmax, vstep
