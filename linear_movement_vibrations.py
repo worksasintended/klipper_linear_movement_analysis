@@ -629,24 +629,21 @@ class LinearMovementVibrationsTest:
         vmin = gcmd.get_int("VMIN", 20)
         vmax = gcmd.get_int("VMAX", vlim)
         vstep = gcmd.get_int("STEP", 5)
-        if vmin > vlim:
-            message = f"Initial velocity '{vmin}' mm/s exceeds printer limit of '{vlim}' mm/s"
-            self._exit_gcommand(GcommandExitType("error"), message)
-        elif vmin < 0:
-            message = f"Initial velocity '{vmin}' mm/s must be positive"
+
+        check_input = [(vmax, 'End'), (vmin, 'Initial')]
+        for value, name in check_input:
+            if value > vlim:
+                message = f"{name} velocity '{vmin}' mm/s exceeds printer limit of '{vlim}' mm/s"
+                self._exit_gcommand(GcommandExitType("error"), message)    
+            elif value < 0:
+                message = f"{name} velocity '{vmin}' mm/s must be positive"
+                self._exit_gcommand(GcommandExitType("error"), message)
+        
+        if vmax - vmin < 0 and vstep < 0:
+            message = "Input velocities do not match VMAX > VMIN and STEP > 0"
             self._exit_gcommand(GcommandExitType("error"), message)
 
-        if vmax > vlim:
-            message = f"End velocity '{vmax}' mm/s exceeds printer limit of '{vlim}' mm/s"
-            self._exit_gcommand(GcommandExitType("error"), message)
-        elif vmax < 0:
-            message = f"End velocity '{vmax}' mm/s must be positive"
-            self._exit_gcommand(GcommandExitType("error"), message)
-
-        if vmax - vmin >= 0 and vstep >= 0:
-            return vmin, vmax, vstep
-        message = "Input velocities do not match VMAX > VMIN and STEP > 0"
-        self._exit_gcommand(GcommandExitType("error"), message)
+        return vmin, vmax, vstep
 
     def _get_velocity(self, gcmd, vlim):
         velocity = gcmd.get_int("VELOCITY", 150)
