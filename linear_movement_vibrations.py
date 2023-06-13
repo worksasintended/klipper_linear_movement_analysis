@@ -214,7 +214,7 @@ class LinearMovementVibrationsTest:
         motion_report = self.printer.lookup_object("motion_report")
         velocity_range = np.arange(
             measurement_parameters.v_min,
-            measurement_parameters.v_max + 1,
+            measurement_parameters.v_max + measurement_parameters.v_step,
             measurement_parameters.v_step,
         )
         powers = np.zeros((len(velocity_range), 4))
