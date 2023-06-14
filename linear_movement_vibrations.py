@@ -223,7 +223,7 @@ class LinearMovementVibrationsTest:
         frequency_responses = []
 
         for vel_idx, velocity in enumerate(velocity_range):
-            gcmd.respond_info(f"measuring {np.round(velocity)} mm/s")
+            gcmd.respond_info(f"measuring {np.round(velocity, 1)} mm/s")
             measurement_parameters.velocity = velocity
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
@@ -647,7 +647,7 @@ class LinearMovementVibrationsTest:
         steps = np.round((vmax - vmin)/vstep)+1
         new_vstep = (vmax-vmin)/(steps-1)
         if new_vstep != vstep:
-            gcmd.respond_info(f"Chosen {vstep} is overriden by {new_vstep} to hit VMAX")
+            gcmd.respond_info(f"Chosen STEP={vstep} is overriden by {np.round(new_vstep,3)} to hit VMAX")
 
         return vmin, vmax, new_vstep
 
