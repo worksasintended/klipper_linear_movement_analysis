@@ -223,7 +223,7 @@ class LinearMovementVibrationsTest:
         frequency_responses = []
 
         for vel_idx, velocity in enumerate(velocity_range):
-            gcmd.respond_info(f"measuring {velocity} mm/s")
+            gcmd.respond_info(f"measuring {np.round(velocity)} mm/s")
             measurement_parameters.velocity = velocity
             # collect data and add them to the sets
             measurement_data = self._measure_linear_movement_vibrations(
@@ -635,22 +635,28 @@ class LinearMovementVibrationsTest:
             if value > vlim:
                 message = f"{name} velocity '{value}' mm/s exceeds printer limit of '{vlim}' mm/s"
                 self._exit_gcommand(GcommandExitType("error"), message)    
-            elif value < 0:
+            elif value <= 0:
                 message = f"{name} velocity '{value}' mm/s must be positive"
                 self._exit_gcommand(GcommandExitType("error"), message)
         
-        if vmax - vmin < 0 or vstep < 0:
+        if vmax - vmin <= 0 or vstep <= 0:
             message = "Input velocities demand VMAX > VMIN and STEP > 0"
             self._exit_gcommand(GcommandExitType("error"), message)
-        else:
-            return vmin, vmax, vstep
+        
+        # to ensure np.arange(start,stop+step, step) hits stop, we recalc step size
+        steps = np.round((vmax - vmin)/vstep)+1
+        new_vstep = (vmax-vmin)/(steps-1)
+        if new_vstep != vstep:
+            gcmd.respond_info(f"Chosen {vstep} is overriden by {new_vstep} to hit VMAX")
+
+        return vmin, vmax, new_vstep
 
     def _get_velocity(self, gcmd, vlim):
         velocity = gcmd.get_int("VELOCITY", 150)
         if vlim < velocity :
             message = f"Requested velocity '{velocity}' exceeds printer limits"
             self._exit_gcommand(GcommandExitType("error"), message)
-        elif velocity < 0:
+        elif velocity <= 0:
             message = f"Requested velocity '{velocity}' mm/s must be positive"
             self._exit_gcommand(GcommandExitType("error"), message)
         return velocity
