@@ -60,7 +60,7 @@ def calculate_frequencies(data, f_max, f_min):
         end_pos = data[:, 0].size
     frequency_response = [absc_fourier[start_pos:end_pos]]
     for axis in range(1, 4):
-        ord_fourier = np.abs(np.fft.rfft(data[:, axis]))
+        ord_fourier = np.abs(signal.periodogram(data[:, axis], 1/dt)[1])
         frequency_response.append(ord_fourier[start_pos:end_pos])
     return frequency_response
 
